@@ -36,16 +36,6 @@
   color: #ccc; /* Updated text color */
 }
 
-.my-component::-webkit-scrollbar {
-  width: 7px;
-  background: #18181b;
-}
-
-.my-component::-webkit-scrollbar-thumb {
-  background: hsla(0, 0%, 100%, 0.5);
-  border-radius: 7px;
-}
-
 .my-component h2 {
   color: white;
   text-align: center;
@@ -69,13 +59,13 @@
   border-radius: 5px;
   cursor: pointer;
   font-weight: bold;
-  background-color: rgb(14 165 233);
+  background-color: rgb(99 102 241);
   color: white;
 }
 
 #loadFollowersButton:hover,
 #loadFollowingButton:hover {
-  background-color: rgb(2 132 199);
+  background-color: rgb(79 70 229);
 }
 
 .my-component input[type="text"] {
@@ -87,43 +77,9 @@
   background-color: #18181b;
 }
 
-.my-component select {
-  width: 100%; /* Full width */
-  padding: 12px;
-  border: none;
-  border-radius: 4px;
-  color: #efeff1;
-  background-color: #18181b;
-  overflow-y: auto;
-}
-
-.my-component select::-webkit-scrollbar {
-  width: 7px;
-  background: #18181b;
-  border-radius: 7px;
-  opacity: 0;
-}
-
-.my-component select:hover::-webkit-scrollbar {
-  opacity: 1;
-}
-
-.my-component select:focus {
-  outline: none;
-  box-shadow: 0 0 0 2px rgba(0, 86, 179, 0.25);
-}
-
-.my-component #unfollow-button {
-  background-color: rgb(239 68 68);
-}
-
-.my-component #unfollow-button:hover {
-  background-color: rgb(220 38 38);
-}
-
 .loader {
-  border: 5px solid rgb(14 165 233);
-  border-top: 5px solid rgb(2 132 199);
+  border: 5px solid rgb(99 102 241);
+  border-top: 5px solid rgb(79 70 229);
   border-radius: 50%;
   width: 50px;
   height: 50px;
@@ -187,76 +143,13 @@
   color: white;
 }
 
-.unfollow-button {
-  width: 90px; /* Largura fixa para o botão */
-  height: 35px; /* Altura opcional, caso queira uma altura fixa também */
-  padding: 10px;
-  background-color: rgb(239 68 68);
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  margin-left: auto; /* Alinha o botão à direita */
-  font-size: 1rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-}
-
-.unfollow-button:hover {
-  background-color: rgb(220 38 38);
-}
-
-.follow-button {
-  width: 90px; /* Largura fixa para o botão */
-  height: 35px; /* Altura opcional, caso queira uma altura fixa também */
-  padding: 10px;
-  background-color: rgb(34 197 94);
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  margin-left: auto; /* Alinha o botão à direita */
-  font-size: 1rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-}
-
-.follow-button:hover {
-  background-color: rgb(22 163 74);
-}
-
-.follow-back-button {
-  width: 90px; /* Largura fixa para o botão */
-  height: 35px; /* Altura opcional, caso queira uma altura fixa também */
-  padding: 10px;
-  background-color: rgb(14 165 233);
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  margin-left: auto; /* Alinha o botão à direita */
-  font-size: 1rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-}
-
-.follow-back-button:hover {
-  background-color: rgb(2 132 199);
-}
-
 #searchInput {
   display: none;
 }
 
-#filterNotFollowingBackButton {
+#filterNotFollowingBackButton,
+#filterNotFollowedBackButton {
   padding: 10px 15px;
-  background-color: #9147ff; /* Roxo Twitch, ajuste conforme sua paleta de cores */
   color: #ffffff; /* Cor do texto */
   border: none;
   border-radius: 5px;
@@ -264,8 +157,13 @@
   font-weight: bold;
   margin-top: 10px; /* Espaçamento superior para separar dos outros controles */
   transition: background-color 0.3s ease;
+  display: none; /* Inicialmente oculto */
 }
 
-#filterNotFollowingBackButton:hover {
-  background-color: #772ce8; /* Um roxo um pouco mais escuro para o hover */
+.filter-active {
+  background-color: rgb(239, 68, 68);
+}
+
+.filter-active:hover {
+  background-color: rgb(220, 38, 38);
 }

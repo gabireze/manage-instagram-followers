@@ -1,38 +1,54 @@
-document
-  .getElementById("loadFollowersButton")
-  .addEventListener("click", fetchFollowers);
+document.getElementById("loadFollowersButton").addEventListener("click", () => {
+  fetchFollowers();
+  currentFilter = null;
 
-document
-  .getElementById("loadFollowingButton")
-  .addEventListener("click", fetchFollowing);
+  document.getElementById("filterNotFollowingBackButton").style.display =
+    "none";
+  document.getElementById("filterNotFollowedBackButton").style.display = "flex";
+  document.getElementById("filterNotFollowedBackButton").textContent =
+    "Filter Not Followed Back";
+});
 
-let endCursor = ""; // Variável global para manter o registro do cursor
-const loadedUsers = new Map(); // Usar Map em vez de Set
+document.getElementById("loadFollowingButton").addEventListener("click", () => {
+  fetchFollowing();
+  currentFilter = null;
+  document.getElementById("filterNotFollowingBackButton").style.display =
+    "flex";
+  document.getElementById("filterNotFollowedBackButton").style.display = "none";
+  document.getElementById("filterNotFollowingBackButton").textContent =
+    "Filter Non-Followers";
+});
+
+document.getElementById("overlay").addEventListener("click", function (event) {
+  if (event.target === this) {
+    this.style.display = "none";
+  }
+});
+
+let endCursor = "";
+const loadedUsers = new Map();
 let filteredUsers = [];
-let currentFilter = "all"; // Opções: 'all', 'notFollowingBack'
 let caller = null;
+let currentFilteredUsers = null; // Armazena os usuários atualmente filtrados ou null
+let currentFilter = null; // Armazena o filtro atual
 
 document.getElementById("searchInput").addEventListener("input", function (e) {
   const searchTerm = e.target.value.toLowerCase();
+  let usersToSearch = currentFilteredUsers || [...loadedUsers.values()]; // Usa currentFilteredUsers se não for null, senão usa todos os usuários
 
   if (!searchTerm) {
     document.getElementById("userList").innerHTML = "";
-    // Usa os valores do Map loadedUsers
-    addUsersToDom([...loadedUsers.values()]);
+    addUsersToDom(usersToSearch);
     return;
   }
 
-  // Agora, filtramos diretamente dos valores de loadedUsers, que é um Map de objetos de usuário
-  filteredUsers = [...loadedUsers.values()].filter(
+  filteredUsers = usersToSearch.filter(
     (user) =>
       user.username.toLowerCase().includes(searchTerm) ||
       user.full_name.toLowerCase().includes(searchTerm)
   );
 
-  // Limpa a lista de usuários antes de repopulá-la com os resultados filtrados
   document.getElementById("userList").innerHTML = "";
-
-  // Passa os usuários filtrados para serem adicionados ao DOM
   addUsersToDom(filteredUsers);
 });
 
@@ -130,11 +146,22 @@ function updateUIWithData(edges, functionCalled) {
   searchInput.style.display = "block";
   populateLoadedUser(edges, functionCalled);
   if (currentFilter === "notFollowingBack" && functionCalled === "Following") {
-    filteredUsers = [...loadedUsers.values()].filter(
-      (user) => !user.follows_viewer
+    currentFilteredUsers = [...loadedUsers.values()].filter(
+      (user) => !user.follows_viewer && user.followed_by_viewer
     );
-    addUsersToDom(filteredUsers);
+    document.getElementById("userList").innerHTML = "";
+    addUsersToDom(currentFilteredUsers);
+  } else if (
+    currentFilter === "notFollowedBack" &&
+    functionCalled === "Followers"
+  ) {
+    currentFilteredUsers = [...loadedUsers.values()].filter(
+      (user) => !user.followed_by_viewer
+    );
+    document.getElementById("userList").innerHTML = "";
+    addUsersToDom(currentFilteredUsers);
   } else {
+    document.getElementById("userList").innerHTML = "";
     addUsersToDom([...loadedUsers.values()]);
   }
 }
@@ -165,27 +192,51 @@ function addUsersToDom(users) {
     userDiv.classList.add("user");
     let buttonLabel = "Follow";
     let buttonAction = "follow";
+    let relationshipInfo = ""; // Inicia a informação do relacionamento como vazia
 
     if (user.followed_by_viewer) {
       buttonLabel = "Unfollow";
       buttonAction = "unfollow";
+      if (!user.follows_viewer) {
+        // Eu sigo, mas a pessoa não me segue de volta
+        relationshipInfo =
+          "<div class='relationship-info'>Not Following You Back</div>";
+      }
     }
 
-    // Caso especial para seguidores que o usuário não segue de volta
-    if (!user.followed_by_viewer && caller === "Followers") {
+    if (!user.followed_by_viewer && user.follows_viewer === undefined) {
+      // A pessoa me segue, mas eu não sigo de volta
       buttonLabel = "Follow Back";
       buttonAction = "follow";
+      relationshipInfo =
+        "<div class='relationship-info'>You Don't Follow Back</div>";
+    }
+
+    if (
+      (user.followed_by_viewer && user.follows_viewer) ||
+      (user.followed_by_viewer && user.follows_viewer === undefined)
+    ) {
+      // Relação mútua
+      relationshipInfo = "<div class='relationship-info'>Mutual</div>";
     }
 
     userDiv.innerHTML = `
       <a href="https://www.instagram.com/${user.username}/" target="_blank">
-        <img src="${user.profile_pic_url}" alt="${user.username}" class="user-photo">
+        <img src="${
+          user.profile_pic_url ??
+          "https://upload.wikimedia.org/wikipedia/commons/2/2c/Default_pfp.svg"
+        }" alt="${user.username}" class="user-photo">
       </a>
       <div class="user-details">
-        <a href="https://www.instagram.com/${user.username}/" target="_blank" class="username">@${user.username}</a>
+        <a href="https://www.instagram.com/${
+          user.username
+        }/" target="_blank" class="username">@${user.username}</a>
         <div class="full-name">${user.full_name}</div>
+        ${relationshipInfo} <!-- Exibe a informação do relacionamento -->
       </div>
-      <button class="action-button" data-id="${user.id}" data-action="${buttonAction}">${buttonLabel}</button>
+      <button class="action-button" data-id="${
+        user.id
+      }" data-action="${buttonAction}">${buttonLabel}</button>
     `;
     usersList.appendChild(userDiv);
   });
@@ -290,16 +341,45 @@ function unfollowUser(userId, button) {
     .catch((error) => console.error("Erro na requisição:", error));
 }
 
+// Ajusta o evento do botão de filtro para alternar entre aplicar e remover o filtro
 document
   .getElementById("filterNotFollowingBackButton")
-  .addEventListener("click", () => {
-    // Alternar o estado do filtro
-    currentFilter = currentFilter === "all" ? "notFollowingBack" : "all";
+  .addEventListener("click", function () {
+    const button = this; // Referência ao botão clicado
+    if (currentFilter === "notFollowingBack") {
+      // Se o filtro atual está ativo, desativa-o
+      currentFilter = null;
+      button.textContent = "Filter Non-Followers"; // Atualiza o texto do botão
+      button.classList.remove("filter-active");
+      // Chama updateUIWithData sem aplicar o filtro, pois queremos remover o filtro
+      currentFilteredUsers = null;
+      updateUIWithData([...loadedUsers.values()], caller); // Pode precisar ajustar essa chamada conforme sua lógica de dados
+    } else {
+      // Ativa o filtro
+      currentFilter = "notFollowingBack";
+      button.textContent = "Remove Filter"; // Atualiza o texto do botão
+      button.classList.add("filter-active");
+      // Aplica o filtro com base no contexto atual (Following ou Followers)
+      updateUIWithData([...loadedUsers.values()], caller); // Ajuste conforme necessário
+    }
+  });
 
-    // Atualiza o texto do botão baseado no filtro
-    document.getElementById("filterNotFollowingBackButton").textContent =
-      currentFilter === "all" ? "Filtrar Não Seguem de Volta" : "Mostrar Todos";
-
-    // Reaplicar a lógica de filtragem com o novo estado
-    updateUIWithData([...loadedUsers.values()], caller);
+document
+  .getElementById("filterNotFollowedBackButton")
+  .addEventListener("click", function () {
+    const button = this; // Referência ao botão clicado
+    if (currentFilter === "notFollowedBack") {
+      currentFilter = null;
+      button.textContent = "Filter Not Followed Back";
+      button.classList.remove("filter-active");
+      // Limpa o filtro e atualiza a UI
+      currentFilteredUsers = null;
+      updateUIWithData([...loadedUsers.values()], caller);
+    } else {
+      currentFilter = "notFollowedBack";
+      button.textContent = "Remove Filter";
+      button.classList.add("filter-active");
+      // Aplica o filtro e atualiza a UI
+      updateUIWithData([...loadedUsers.values()], caller);
+    }
   });
