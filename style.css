@@ -51,6 +51,7 @@
   text-align: center;
   font-size: 2.25rem;
   margin: 0;
+  line-height: 1.2;
 }
 
 .my-component #info-text,
@@ -60,7 +61,8 @@
   color: #ccc; /* Lighter color for better contrast */
 }
 
-#loadButton {
+#loadFollowersButton,
+#loadFollowingButton {
   width: 100%; /* Full width */
   padding: 10px;
   border: none;
@@ -71,7 +73,8 @@
   color: white;
 }
 
-#loadButton:hover {
+#loadFollowersButton:hover,
+#loadFollowingButton:hover {
   background-color: rgb(2 132 199);
 }
 
@@ -209,7 +212,7 @@
   width: 90px; /* Largura fixa para o botão */
   height: 35px; /* Altura opcional, caso queira uma altura fixa também */
   padding: 10px;
-  background-color: rgb(14 165 233);
+  background-color: rgb(34 197 94);
   color: white;
   border: none;
   border-radius: 5px;
@@ -223,6 +226,27 @@
 }
 
 .follow-button:hover {
+  background-color: rgb(22 163 74);
+}
+
+.follow-back-button {
+  width: 90px; /* Largura fixa para o botão */
+  height: 35px; /* Altura opcional, caso queira uma altura fixa também */
+  padding: 10px;
+  background-color: rgb(14 165 233);
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-left: auto; /* Alinha o botão à direita */
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.follow-back-button:hover {
   background-color: rgb(2 132 199);
 }
 

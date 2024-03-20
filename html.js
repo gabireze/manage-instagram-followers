@@ -4,13 +4,13 @@ const init = () => {
     var componentHtml = `
     <div class="overlay" id="overlay">
     <div class="my-component centered-column">
-      <h2>Não Seguidores no Instagram</h2>
-      <div id="info-text">Descubra quem não está seguindo você de volta.</div>
-      <input type="text" placeholder="Pesquisar..." id="searchInput">
+      <h2>Manage Instagram Followers</h2>
+      <div id="info-text">Manage your Instagram followers, including features to follow back, unfollow non-followers, and discover mutual followers.</div>
+      <input type="text" placeholder="Search..." id="searchInput">
       <div class="user-list" id="userList">
-        <!-- Lista de usuários não seguidores será populada aqui -->
       </div>
-      <button id="loadButton">Carregar</button>
+      <button id="loadFollowersButton">Followers</button>
+      <button id="loadFollowingButton">Following</button>
       <div class="loader" id="loader"></div>
     </div>
   </div>  
