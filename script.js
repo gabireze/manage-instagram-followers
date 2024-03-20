@@ -9,6 +9,7 @@ document
 let endCursor = ""; // Variável global para manter o registro do cursor
 const loadedUsers = new Map(); // Usar Map em vez de Set
 let filteredUsers = [];
+let currentFilter = "all"; // Opções: 'all', 'notFollowingBack'
 let caller = null;
 
 document.getElementById("searchInput").addEventListener("input", function (e) {
@@ -68,7 +69,7 @@ async function fetchFollowing() {
     const hasNextPage = data.data.user.edge_follow.page_info.has_next_page;
 
     // Chama função para atualizar a UI
-    updateUIWithData(data.data.user.edge_follow.edges, "Followers");
+    updateUIWithData(data.data.user.edge_follow.edges, "Following");
 
     if (hasNextPage) {
       fetchFollowing(); // Chama a si mesma para buscar a próxima página
@@ -113,7 +114,7 @@ async function fetchFollowers() {
     const hasNextPage = data.data.user.edge_followed_by.page_info.has_next_page;
 
     // Chama função para atualizar a UI
-    updateUIWithData(data.data.user.edge_followed_by.edges, "Following");
+    updateUIWithData(data.data.user.edge_followed_by.edges, "Followers");
 
     if (hasNextPage) {
       fetchFollowers(); // Chama a si mesma para buscar a próxima página
@@ -128,7 +129,14 @@ async function fetchFollowers() {
 function updateUIWithData(edges, functionCalled) {
   searchInput.style.display = "block";
   populateLoadedUser(edges, functionCalled);
-  addUsersToDom(loadedUsers.values());
+  if (currentFilter === "notFollowingBack" && functionCalled === "Following") {
+    filteredUsers = [...loadedUsers.values()].filter(
+      (user) => !user.follows_viewer
+    );
+    addUsersToDom(filteredUsers);
+  } else {
+    addUsersToDom([...loadedUsers.values()]);
+  }
 }
 
 function populateLoadedUser(users, functionCalled) {
@@ -137,7 +145,8 @@ function populateLoadedUser(users, functionCalled) {
     caller = functionCalled;
   }
   users.forEach((edge) => {
-    const user = edge.node;
+    const user = edge.node ?? edge;
+
     // Verifica se o usuário já foi carregado usando seu id como chave
     if (!loadedUsers.has(user.id)) {
       // Adiciona o usuário ao Map, usando o id como chave e o objeto user como valor
@@ -280,3 +289,17 @@ function unfollowUser(userId, button) {
     })
     .catch((error) => console.error("Erro na requisição:", error));
 }
+
+document
+  .getElementById("filterNotFollowingBackButton")
+  .addEventListener("click", () => {
+    // Alternar o estado do filtro
+    currentFilter = currentFilter === "all" ? "notFollowingBack" : "all";
+
+    // Atualiza o texto do botão baseado no filtro
+    document.getElementById("filterNotFollowingBackButton").textContent =
+      currentFilter === "all" ? "Filtrar Não Seguem de Volta" : "Mostrar Todos";
+
+    // Reaplicar a lógica de filtragem com o novo estado
+    updateUIWithData([...loadedUsers.values()], caller);
+  });

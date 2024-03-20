@@ -7,6 +7,7 @@ const init = () => {
       <h2>Manage Instagram Followers</h2>
       <div id="info-text">Manage your Instagram followers, including features to follow back, unfollow non-followers, and discover mutual followers.</div>
       <input type="text" placeholder="Search..." id="searchInput">
+      <button id="filterNotFollowingBackButton">Filter Non-Followers</button>
       <div class="user-list" id="userList">
       </div>
       <button id="loadFollowersButton">Followers</button>

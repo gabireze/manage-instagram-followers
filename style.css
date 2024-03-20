@@ -253,3 +253,19 @@
 #searchInput {
   display: none;
 }
+
+#filterNotFollowingBackButton {
+  padding: 10px 15px;
+  background-color: #9147ff; /* Roxo Twitch, ajuste conforme sua paleta de cores */
+  color: #ffffff; /* Cor do texto */
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: bold;
+  margin-top: 10px; /* Espaçamento superior para separar dos outros controles */
+  transition: background-color 0.3s ease;
+}
+
+#filterNotFollowingBackButton:hover {
+  background-color: #772ce8; /* Um roxo um pouco mais escuro para o hover */
+}
