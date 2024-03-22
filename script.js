@@ -7,13 +7,18 @@ const filterNotFollowedBackButton = document.getElementById(
   "filterNotFollowedBackButton"
 );
 const overlay = document.getElementById("overlay");
+const infoText = document.getElementById("info-text");
+const title = document.getElementById("title");
 
 function resetUI() {
   loadedUsers.clear();
   currentFilter = null;
+  title.textContent = caller === "Followers" ? "Followers" : "Following";
+  title.style.display = "flex";
   document
     .querySelectorAll(".filter")
     .forEach((element) => element.classList.remove("filter-active"));
+  infoText.style.display = "none";
 }
 
 function toggleFilterButtons({
@@ -83,8 +88,10 @@ const fetchFollowing = async () => {
   const loader = document.getElementById("loader");
   loader.style.display = "block";
   const loadFollowingButton = document.getElementById("loadFollowingButton");
-  loadFollowingButton.disabled = true;
-  loadFollowingButton.style.cursor = "not-allowed";
+  document.querySelectorAll(".my-component button").forEach((element) => {
+    element.disabled = true;
+    element.style.cursor = "not-allowed";
+  });
   try {
     const variables = {
       id: "240664985",
@@ -112,12 +119,16 @@ const fetchFollowing = async () => {
     if (hasNextPage) {
       fetchFollowing();
     }
+    if (!endCursor) {
+      loader.style.display = "none";
+      document.querySelectorAll(".my-component button").forEach((element) => {
+        element.disabled = false;
+        element.style.cursor = "pointer";
+      });
+    }
   } catch (error) {
     console.error("Error when fetching data from Instagram:", error);
   } finally {
-    loader.style.display = "none";
-    loadFollowingButton.disabled = false;
-    loadFollowingButton.style.cursor = "pointer";
   }
 };
 
@@ -168,6 +179,7 @@ const fetchFollowers = async () => {
 function updateUIWithData(edges, functionCalled) {
   document.getElementById("searchInput").style.display = "block";
   const userList = document.getElementById("userList");
+
   populateLoadedUser(edges, functionCalled);
   if (currentFilter === "notFollowingBack" && functionCalled === "Following") {
     currentFilteredUsers = [...loadedUsers.values()].filter(
@@ -206,6 +218,7 @@ function addUsersToDom(users) {
   const usersList = document.getElementById("userList");
   usersList.innerHTML = "";
   usersList.style.display = "flex";
+  title.textContent = caller === "Followers" ? "Followers" : "Following";
 
   const relationshipConfig = {
     Following: {
@@ -259,7 +272,10 @@ function addUsersToDom(users) {
       },
     },
   };
-
+  if (users.length === 0) {
+    usersList.innerHTML = "<div>No users to show.</div>";
+    return;
+  }
   users.forEach((user) => {
     const userDiv = document.createElement("div");
     userDiv.classList.add("user");
@@ -482,7 +498,7 @@ document
     const button = this;
     if (currentFilter === "notFollowingBack") {
       currentFilter = null;
-      button.textContent = "Filter Non-Followers";
+      button.textContent = "Non-Followers";
       button.classList.remove("filter-active");
       currentFilteredUsers = null;
       updateUIWithData([...loadedUsers.values()], caller);
@@ -500,7 +516,7 @@ document
     const button = this;
     if (currentFilter === "notFollowedBack") {
       currentFilter = null;
-      button.textContent = "Filter Not Followed Back";
+      button.textContent = "Not Followed Back";
       button.classList.remove("filter-active");
       currentFilteredUsers = null;
       updateUIWithData([...loadedUsers.values()], caller);
