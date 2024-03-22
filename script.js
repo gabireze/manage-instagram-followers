@@ -1,7 +1,9 @@
 document.getElementById("loadFollowersButton").addEventListener("click", () => {
   fetchFollowers();
   currentFilter = null;
-
+  document
+    .getElementById("filterNotFollowingBackButton")
+    .classList.remove("filter-active");
   document.getElementById("filterNotFollowingBackButton").style.display =
     "none";
   document.getElementById("filterNotFollowedBackButton").style.display = "flex";
@@ -12,6 +14,9 @@ document.getElementById("loadFollowersButton").addEventListener("click", () => {
 document.getElementById("loadFollowingButton").addEventListener("click", () => {
   fetchFollowing();
   currentFilter = null;
+  document
+    .getElementById("filterNotFollowedBackButton")
+    .classList.remove("filter-active");
   document.getElementById("filterNotFollowingBackButton").style.display =
     "flex";
   document.getElementById("filterNotFollowedBackButton").style.display = "none";
@@ -55,7 +60,8 @@ document.getElementById("searchInput").addEventListener("input", function (e) {
 async function fetchFollowing() {
   const loader = document.getElementById("loader");
   loader.style.display = "block"; // Mostrar o loader
-
+  document.getElementById("loadFollowingButton").disabled = true;
+  document.getElementById("loadFollowingButton").style.cursor = "not-allowed";
   try {
     const variables = {
       id: "240664985", // Seu ID de usuário do Instagram
@@ -76,7 +82,7 @@ async function fetchFollowing() {
 
     const data = await response.json();
     if (data.data.user.edge_follow.edges.length === 0) {
-      alert("Você não segue ninguém ou não foi possível carregar os dados.");
+      alert("You don't follow anyone or it was not possible to load the data.");
       return;
     }
 
@@ -91,16 +97,19 @@ async function fetchFollowing() {
       fetchFollowing(); // Chama a si mesma para buscar a próxima página
     }
   } catch (error) {
-    console.error("Erro ao buscar dados do Instagram:", error);
+    console.error("Error when fetching data from Instagram:", error);
   } finally {
     loader.style.display = "none"; // Ocultar o loader após a operação
+    document.getElementById("loadFollowingButton").disabled = true;
+    document.getElementById("loadFollowingButton").style.cursor = "pointer";
   }
 }
 
 async function fetchFollowers() {
   const loader = document.getElementById("loader");
   loader.style.display = "block"; // Mostrar o loader
-
+  document.getElementById("loadFollowersButton").disabled = true;
+  document.getElementById("loadFollowersButton").style.cursor = "not-allowed";
   try {
     const variables = {
       id: "240664985", // Seu ID de usuário do Instagram
@@ -121,7 +130,9 @@ async function fetchFollowers() {
 
     const data = await response.json();
     if (data.data.user.edge_followed_by.edges.length === 0) {
-      alert("Você não segue ninguém ou não foi possível carregar os dados.");
+      alert(
+        "You don't have any followers or it was not possible to load the data."
+      );
       return;
     }
 
@@ -136,9 +147,11 @@ async function fetchFollowers() {
       fetchFollowers(); // Chama a si mesma para buscar a próxima página
     }
   } catch (error) {
-    console.error("Erro ao buscar dados do Instagram:", error);
+    console.error("Error when fetching data from Instagram:", error);
   } finally {
     loader.style.display = "none"; // Ocultar o loader após a operação
+    document.getElementById("loadFollowersButton").disabled = false;
+    document.getElementById("loadFollowersButton").style.cursor = "pointer";
   }
 }
 
@@ -301,44 +314,51 @@ function handleActionButtonClick(event) {
 }
 
 function followUser(userId, button) {
+  button.disabled = true;
   fetch(`https://i.instagram.com/api/v1/web/friendships/${userId}/follow/`, {
     method: "POST",
     headers: headers,
-    credentials: "include", // Necessário para incluir cookies de sessão
+    credentials: "include",
     mode: "cors",
   })
     .then((response) => {
       if (response.ok) {
-        console.log("Usuário seguido com sucesso.");
+        console.log("User followed successfully.");
         button.textContent = "Unfollow";
         button.setAttribute("data-action", "unfollow");
         // Atualizações adicionais na UI podem ser feitas aqui
       } else {
-        console.error("Erro ao tentar seguir o usuário.");
+        console.error("Error trying to follow the user.");
       }
     })
-    .catch((error) => console.error("Erro na requisição:", error));
+    .catch((error) => console.error("Error in the request:", error))
+    .finally(() => {
+      button.disabled = false;
+    });
 }
 
-// Exemplo de uso dos cabeçalhos em uma requisição fetch para deixar de seguir um usuário
 function unfollowUser(userId, button) {
+  button.disabled = true;
   fetch(`https://i.instagram.com/api/v1/web/friendships/${userId}/unfollow/`, {
     method: "POST",
     headers: headers,
-    credentials: "include", // Necessário para incluir cookies de sessão
+    credentials: "include",
     mode: "cors",
   })
     .then((response) => {
       if (response.ok) {
-        console.log("Usuário deixou de seguir com sucesso.");
+        console.log("User unfollowed successfully.");
         button.textContent = "Follow";
         button.setAttribute("data-action", "follow");
         // Atualizações adicionais na UI podem ser feitas aqui
       } else {
-        console.error("Erro ao tentar deixar de seguir o usuário.");
+        console.error("Error trying to unfollow the user.");
       }
     })
-    .catch((error) => console.error("Erro na requisição:", error));
+    .catch((error) => console.error("Error in the request:", error))
+    .finally(() => {
+      button.disabled = false;
+    });
 }
 
 // Ajusta o evento do botão de filtro para alternar entre aplicar e remover o filtro

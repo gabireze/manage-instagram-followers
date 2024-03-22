@@ -167,3 +167,12 @@
 .filter-active:hover {
   background-color: rgb(220, 38, 38);
 }
+
+.action-button:disabled {
+  cursor: not-allowed;
+  background-color: #6b6b6b;
+  border-radius: 2px;
+  border-color: #6b6b6b;
+  border-style: none;
+  padding: 3px 8px;
+}
