@@ -315,6 +315,45 @@ function handleActionButtonClick(event) {
   }
 }
 
+function updateRelationshipInfo(userId, newStatus) {
+  const userDiv = document.querySelector(`div.user[data-id="${userId}"]`);
+  const relationshipInfoDiv = userDiv.querySelector(".relationship-info");
+  const userActionButton = userDiv.querySelector(".action-button");
+
+  const user = loadedUsers.get(userId);
+
+  if (caller === "Followers") {
+    if (newStatus === "follow") {
+      relationshipInfoDiv.innerHTML = "Mutual";
+      userActionButton.textContent = "Unfollow";
+    } else if (newStatus === "unfollow") {
+      relationshipInfoDiv.innerHTML = "You Don't Follow Back";
+      userActionButton.textContent = "Follow Back";
+    }
+  }
+
+  if (caller === "Following") {
+    if (newStatus === "follow") {
+      if (user.followed_by_viewer && user.follows_viewer) {
+        relationshipInfoDiv.innerHTML = "Mutual";
+        userActionButton.textContent = "Unfollow";
+      }
+      if (user.followed_by_viewer && !user.follows_viewer) {
+        relationshipInfoDiv.innerHTML = "Not Following You Back";
+        userActionButton.textContent = "Unfollow";
+      }
+    } else if (newStatus === "unfollow") {
+      if (user.followed_by_viewer && user.follows_viewer) {
+        relationshipInfoDiv.innerHTML = "You Don't Follow Back";
+        userActionButton.textContent = "Follow Back";
+      } else if (user.followed_by_viewer && !user.follows_viewer) {
+        relationshipInfoDiv.innerHTML = "Not Following You Back";
+        userActionButton.textContent = "Follow";
+      }
+    }
+  }
+}
+
 function followUser(userId, button) {
   button.disabled = true;
   fetch(`https://i.instagram.com/api/v1/web/friendships/${userId}/follow/`, {
@@ -326,8 +365,8 @@ function followUser(userId, button) {
     .then((response) => {
       if (response.ok) {
         console.log("User followed successfully.");
-        button.textContent = "Unfollow";
         button.setAttribute("data-action", "unfollow");
+        updateRelationshipInfo(userId, "follow");
         // Atualizações adicionais na UI podem ser feitas aqui
       } else {
         console.error("Error trying to follow the user.");
@@ -350,8 +389,8 @@ function unfollowUser(userId, button) {
     .then((response) => {
       if (response.ok) {
         console.log("User unfollowed successfully.");
-        button.textContent = "Follow";
         button.setAttribute("data-action", "follow");
+        updateRelationshipInfo(userId, "unfollow");
         // Atualizações adicionais na UI podem ser feitas aqui
       } else {
         console.error("Error trying to unfollow the user.");
