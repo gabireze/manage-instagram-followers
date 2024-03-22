@@ -1,32 +1,50 @@
-document.getElementById("loadFollowersButton").addEventListener("click", () => {
+const loadFollowersButton = document.getElementById("loadFollowersButton");
+const loadFollowingButton = document.getElementById("loadFollowingButton");
+const filterNotFollowingBackButton = document.getElementById(
+  "filterNotFollowingBackButton"
+);
+const filterNotFollowedBackButton = document.getElementById(
+  "filterNotFollowedBackButton"
+);
+const overlay = document.getElementById("overlay");
+
+function resetUI() {
   loadedUsers.clear();
+  currentFilter = null;
+  document
+    .querySelectorAll(".filter")
+    .forEach((element) => element.classList.remove("filter-active"));
+}
+
+function toggleFilterButtons({
+  followingBackDisplay = "none",
+  followedBackDisplay = "flex",
+  followedBackText = "",
+}) {
+  filterNotFollowingBackButton.style.display = followingBackDisplay;
+  filterNotFollowedBackButton.style.display = followedBackDisplay;
+  if (followedBackText) {
+    filterNotFollowedBackButton.textContent = followedBackText;
+  }
+}
+
+loadFollowersButton.addEventListener("click", () => {
+  resetUI();
   fetchFollowers();
-  currentFilter = null;
-  Array.from(document.getElementsByClassName("filter")).forEach((element) =>
-    element.classList.remove("filter-active")
-  );
-  document.getElementById("filterNotFollowingBackButton").style.display =
-    "none";
-  document.getElementById("filterNotFollowedBackButton").style.display = "flex";
-  document.getElementById("filterNotFollowedBackButton").textContent =
-    "Filter Not Followed Back";
+  toggleFilterButtons({ followedBackText: "Filter Not Followed Back" });
 });
 
-document.getElementById("loadFollowingButton").addEventListener("click", () => {
-  loadedUsers.clear();
+loadFollowingButton.addEventListener("click", () => {
+  resetUI();
   fetchFollowing();
-  currentFilter = null;
-  Array.from(document.getElementsByClassName("filter")).forEach((element) =>
-    element.classList.remove("filter-active")
-  );
-  document.getElementById("filterNotFollowingBackButton").style.display =
-    "flex";
-  document.getElementById("filterNotFollowedBackButton").style.display = "none";
-  document.getElementById("filterNotFollowingBackButton").textContent =
-    "Filter Non-Followers";
+  toggleFilterButtons({
+    followingBackDisplay: "flex",
+    followedBackDisplay: "none",
+    followedBackText: "Filter Non-Followers",
+  });
 });
 
-document.getElementById("overlay").addEventListener("click", function (event) {
+overlay.addEventListener("click", function (event) {
   if (event.target === this) {
     this.style.display = "none";
   }
