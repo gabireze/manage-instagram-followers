@@ -63,9 +63,10 @@ let followUnfollowAttempts = {
 
 document.getElementById("searchInput").addEventListener("input", function (e) {
   const searchTerm = e.target.value.toLowerCase();
+  const usersList = document.getElementById("userList");
   let usersToSearch = currentFilteredUsers || [...loadedUsers.values()];
   if (!searchTerm) {
-    document.getElementById("userList").innerHTML = "";
+    usersList.innerHTML = "";
     addUsersToDom(usersToSearch);
     return;
   }
@@ -74,7 +75,7 @@ document.getElementById("searchInput").addEventListener("input", function (e) {
       user.username.toLowerCase().includes(searchTerm) ||
       user.full_name.toLowerCase().includes(searchTerm)
   );
-  document.getElementById("userList").innerHTML = "";
+  usersList.innerHTML = "";
   addUsersToDom(filteredUsers);
 });
 
@@ -206,72 +207,71 @@ function addUsersToDom(users) {
   usersList.innerHTML = "";
   usersList.style.display = "flex";
 
+  const relationshipConfig = {
+    Following: {
+      true: {
+        true: { info: "Mutual", label: "Unfollow", action: "unfollow" },
+        false: {
+          info: "Not Following You Back",
+          label: "Unfollow",
+          action: "unfollow",
+        },
+      },
+      false: {
+        true: {
+          info: "You Don't Follow Back",
+          label: "Follow Back",
+          action: "follow",
+        },
+        false: {
+          info: "You don't follow each other",
+          label: "Follow",
+          action: "follow",
+        },
+      },
+    },
+    Followers: {
+      true: {
+        true: { info: "Mutual", label: "Unfollow", action: "unfollow" },
+        false: {
+          info: "Not Following You Back",
+          label: "Unfollow",
+          action: "unfollow",
+        },
+        undefined: { info: "Mutual", label: "Unfollow", action: "unfollow" },
+      },
+      false: {
+        true: {
+          info: "You Don't Follow Back",
+          label: "Follow Back",
+          action: "follow",
+        },
+        false: {
+          info: "You don't follow each other",
+          label: "Follow",
+          action: "follow",
+        },
+        undefined: {
+          info: "You Don't Follow Back",
+          label: "Follow Back",
+          action: "follow",
+        },
+      },
+    },
+  };
+
   users.forEach((user) => {
     const userDiv = document.createElement("div");
     userDiv.classList.add("user");
     userDiv.setAttribute("data-id", user.id);
 
-    let buttonLabel = "Follow";
-    let buttonAction = "follow";
-    let relationshipInfo = "";
-
-    if (caller === "Following") {
-      if (user.followed_by_viewer && user.follows_viewer) {
-        relationshipInfo = "<div class='relationship-info'>Mutual</div>";
-        buttonLabel = "Unfollow";
-        buttonAction = "unfollow";
-      }
-      if (user.followed_by_viewer && !user.follows_viewer) {
-        relationshipInfo =
-          "<div class='relationship-info'>Not Following You Back</div>";
-        buttonLabel = "Unfollow";
-        buttonAction = "unfollow";
-      }
-      if (!user.followed_by_viewer && user.follows_viewer) {
-        relationshipInfo =
-          "<div class='relationship-info'>You Don't Follow Back</div>";
-        buttonLabel = "Follow Back";
-        buttonAction = "follow";
-      }
-      if (!user.followed_by_viewer && !user.follows_viewer) {
-        relationshipInfo =
-          "<div class='relationship-info'>You don't follow each other</div>";
-        buttonLabel = "Follow";
-        buttonAction = "follow";
-      }
-    }
-
-    if (caller === "Followers") {
-      if (
-        (user.followed_by_viewer && user.follows_viewer) ||
-        (user.followed_by_viewer && user.follows_viewer === undefined)
-      ) {
-        relationshipInfo = "<div class='relationship-info'>Mutual</div>";
-        buttonLabel = "Unfollow";
-        buttonAction = "unfollow";
-      }
-      if (user.followed_by_viewer && !user.follows_viewer) {
-        relationshipInfo =
-          "<div class='relationship-info'>Not Following You Back</div>";
-        buttonLabel = "Unfollow";
-        buttonAction = "unfollow";
-      }
-      if (
-        (!user.followed_by_viewer && user.follows_viewer === undefined) ||
-        (!user.followed_by_viewer && user.follows_viewer)
-      ) {
-        relationshipInfo =
-          "<div class='relationship-info'>You Don't Follow Back</div>";
-        buttonLabel = "Follow Back";
-        buttonAction = "follow";
-      }
-      if (!user.followed_by_viewer && !user.follows_viewer) {
-        relationshipInfo =
-          "<div class='relationship-info'>You don't follow each other</div>";
-        buttonLabel = "Follow";
-        buttonAction = "follow";
-      }
-    }
+    const relationState =
+      relationshipConfig[caller][!!user.followed_by_viewer][
+        user.follows_viewer
+      ];
+    const relationshipInfo = `<div class='relationship-info'>${relationState.info}</div>`;
+    const buttonLabel = relationState.label;
+    const buttonAction = relationState.action;
 
     userDiv.innerHTML = `
       <a href="https://www.instagram.com/${user.username}/" target="_blank">
