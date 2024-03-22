@@ -100,7 +100,7 @@ async function fetchFollowing() {
     console.error("Error when fetching data from Instagram:", error);
   } finally {
     loader.style.display = "none"; // Ocultar o loader após a operação
-    document.getElementById("loadFollowingButton").disabled = true;
+    document.getElementById("loadFollowingButton").disabled = false;
     document.getElementById("loadFollowingButton").style.cursor = "pointer";
   }
 }
