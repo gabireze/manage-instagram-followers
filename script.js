@@ -2,9 +2,9 @@ document.getElementById("loadFollowersButton").addEventListener("click", () => {
   loadedUsers.clear();
   fetchFollowers();
   currentFilter = null;
-  document
-    .getElementById("filterNotFollowingBackButton")
-    .classList.remove("filter-active");
+  Array.from(document.getElementsByClassName("filter")).forEach((element) =>
+    element.classList.remove("filter-active")
+  );
   document.getElementById("filterNotFollowingBackButton").style.display =
     "none";
   document.getElementById("filterNotFollowedBackButton").style.display = "flex";
@@ -16,9 +16,9 @@ document.getElementById("loadFollowingButton").addEventListener("click", () => {
   loadedUsers.clear();
   fetchFollowing();
   currentFilter = null;
-  document
-    .getElementById("filterNotFollowedBackButton")
-    .classList.remove("filter-active");
+  Array.from(document.getElementsByClassName("filter")).forEach((element) =>
+    element.classList.remove("filter-active")
+  );
   document.getElementById("filterNotFollowingBackButton").style.display =
     "flex";
   document.getElementById("filterNotFollowedBackButton").style.display = "none";
@@ -36,100 +36,92 @@ let endCursor = "";
 const loadedUsers = new Map();
 let filteredUsers = [];
 let caller = null;
-let currentFilteredUsers = null; // Armazena os usuários atualmente filtrados ou null
-let currentFilter = null; // Armazena o filtro atual
+let currentFilteredUsers = null;
+let currentFilter = null;
+let followUnfollowAttempts = {
+  follow: [],
+  unfollow: [],
+};
 
 document.getElementById("searchInput").addEventListener("input", function (e) {
   const searchTerm = e.target.value.toLowerCase();
-  let usersToSearch = currentFilteredUsers || [...loadedUsers.values()]; // Usa currentFilteredUsers se não for null, senão usa todos os usuários
-
+  let usersToSearch = currentFilteredUsers || [...loadedUsers.values()];
   if (!searchTerm) {
     document.getElementById("userList").innerHTML = "";
     addUsersToDom(usersToSearch);
     return;
   }
-
   filteredUsers = usersToSearch.filter(
     (user) =>
       user.username.toLowerCase().includes(searchTerm) ||
       user.full_name.toLowerCase().includes(searchTerm)
   );
-
   document.getElementById("userList").innerHTML = "";
   addUsersToDom(filteredUsers);
 });
 
-async function fetchFollowing() {
+const fetchFollowing = async () => {
   const loader = document.getElementById("loader");
-  loader.style.display = "block"; // Mostrar o loader
+  loader.style.display = "block";
   document.getElementById("loadFollowingButton").disabled = true;
   document.getElementById("loadFollowingButton").style.cursor = "not-allowed";
   try {
     const variables = {
-      id: "240664985", // Seu ID de usuário do Instagram
+      id: "240664985",
       include_reel: false,
       fetch_mutual: false,
-      first: 50, // Número de usuários para retornar por página
-      after: endCursor, // Passar o cursor da última requisição aqui
+      first: 50,
+      after: endCursor,
     };
-
     const response = await fetch(
       `https://www.instagram.com/graphql/query/?query_hash=3dec7e2c57367ef3da3d987d89f9dbc8&variables=${encodeURIComponent(
         JSON.stringify(variables)
       )}`
     );
     if (!response.ok) {
-      throw new Error(`Erro HTTP: ${response.status}`);
+      throw new Error(`HTTP Error: ${response.status}`);
     }
-
     const data = await response.json();
     if (data.data.user.edge_follow.edges.length === 0) {
       alert("You don't follow anyone or it was not possible to load the data.");
       return;
     }
-
-    // Atualize o cursor global com o novo end_cursor da resposta
     endCursor = data.data.user.edge_follow.page_info.end_cursor;
     const hasNextPage = data.data.user.edge_follow.page_info.has_next_page;
-
-    // Chama função para atualizar a UI
     updateUIWithData(data.data.user.edge_follow.edges, "Following");
-
     if (hasNextPage) {
-      fetchFollowing(); // Chama a si mesma para buscar a próxima página
+      fetchFollowing();
     }
   } catch (error) {
     console.error("Error when fetching data from Instagram:", error);
   } finally {
-    loader.style.display = "none"; // Ocultar o loader após a operação
+    loader.style.display = "none";
     document.getElementById("loadFollowingButton").disabled = false;
     document.getElementById("loadFollowingButton").style.cursor = "pointer";
   }
-}
+};
 
-async function fetchFollowers() {
+const fetchFollowers = async () => {
   const loader = document.getElementById("loader");
-  loader.style.display = "block"; // Mostrar o loader
+  loader.style.display = "block";
   document.getElementById("loadFollowersButton").disabled = true;
   document.getElementById("loadFollowersButton").style.cursor = "not-allowed";
   try {
     const variables = {
-      id: "240664985", // Seu ID de usuário do Instagram
+      id: "240664985",
       include_reel: false,
       fetch_mutual: false,
-      first: 50, // Número de usuários para retornar por página
-      after: endCursor, // Passar o cursor da última requisição aqui
+      first: 50,
+      after: endCursor,
     };
-
     const response = await fetch(
       `https://www.instagram.com/graphql/query/?query_hash=c76146de99bb02f6415203be841dd25a&variables=${encodeURIComponent(
         JSON.stringify(variables)
       )}`
     );
     if (!response.ok) {
-      throw new Error(`Erro HTTP: ${response.status}`);
+      throw new Error(`HTTP Error: ${response.status}`);
     }
-
     const data = await response.json();
     if (data.data.user.edge_followed_by.edges.length === 0) {
       alert(
@@ -137,28 +129,23 @@ async function fetchFollowers() {
       );
       return;
     }
-
-    // Atualize o cursor global com o novo end_cursor da resposta
     endCursor = data.data.user.edge_followed_by.page_info.end_cursor;
     const hasNextPage = data.data.user.edge_followed_by.page_info.has_next_page;
-
-    // Chama função para atualizar a UI
     updateUIWithData(data.data.user.edge_followed_by.edges, "Followers");
-
     if (hasNextPage) {
-      fetchFollowers(); // Chama a si mesma para buscar a próxima página
+      fetchFollowers();
     }
   } catch (error) {
     console.error("Error when fetching data from Instagram:", error);
   } finally {
-    loader.style.display = "none"; // Ocultar o loader após a operação
+    loader.style.display = "none";
     document.getElementById("loadFollowersButton").disabled = false;
     document.getElementById("loadFollowersButton").style.cursor = "pointer";
   }
-}
+};
 
 function updateUIWithData(edges, functionCalled) {
-  searchInput.style.display = "block";
+  document.getElementById("searchInput").style.display = "block";
   populateLoadedUser(edges, functionCalled);
   if (currentFilter === "notFollowingBack" && functionCalled === "Following") {
     currentFilteredUsers = [...loadedUsers.values()].filter(
@@ -187,10 +174,7 @@ function populateLoadedUser(users, functionCalled) {
   }
   users.forEach((edge) => {
     const user = edge.node ?? edge;
-
-    // Verifica se o usuário já foi carregado usando seu id como chave
     if (!loadedUsers.has(user.id)) {
-      // Adiciona o usuário ao Map, usando o id como chave e o objeto user como valor
       loadedUsers.set(user.id, user);
     }
   });
@@ -198,41 +182,74 @@ function populateLoadedUser(users, functionCalled) {
 
 function addUsersToDom(users) {
   const usersList = document.getElementById("userList");
-  usersList.innerHTML = ""; // Limpa a lista antes de adicionar novos usuários
+  usersList.innerHTML = "";
   usersList.style.display = "flex";
 
   users.forEach((user) => {
     const userDiv = document.createElement("div");
     userDiv.classList.add("user");
     userDiv.setAttribute("data-id", user.id);
+
     let buttonLabel = "Follow";
     let buttonAction = "follow";
-    let relationshipInfo = ""; // Inicia a informação do relacionamento como vazia
+    let relationshipInfo = "";
 
-    if (user.followed_by_viewer) {
-      buttonLabel = "Unfollow";
-      buttonAction = "unfollow";
-      if (!user.follows_viewer) {
-        // Eu sigo, mas a pessoa não me segue de volta
+    if (caller === "Following") {
+      if (user.followed_by_viewer && user.follows_viewer) {
+        relationshipInfo = "<div class='relationship-info'>Mutual</div>";
+        buttonLabel = "Unfollow";
+        buttonAction = "unfollow";
+      }
+      if (user.followed_by_viewer && !user.follows_viewer) {
         relationshipInfo =
           "<div class='relationship-info'>Not Following You Back</div>";
+        buttonLabel = "Unfollow";
+        buttonAction = "unfollow";
+      }
+      if (!user.followed_by_viewer && user.follows_viewer) {
+        relationshipInfo =
+          "<div class='relationship-info'>You Don't Follow Back</div>";
+        buttonLabel = "Follow Back";
+        buttonAction = "follow";
+      }
+      if (!user.followed_by_viewer && !user.follows_viewer) {
+        relationshipInfo =
+          "<div class='relationship-info'>You don't follow each other</div>";
+        buttonLabel = "Follow";
+        buttonAction = "follow";
       }
     }
 
-    if (!user.followed_by_viewer && user.follows_viewer === undefined) {
-      // A pessoa me segue, mas eu não sigo de volta
-      buttonLabel = "Follow Back";
-      buttonAction = "follow";
-      relationshipInfo =
-        "<div class='relationship-info'>You Don't Follow Back</div>";
-    }
-
-    if (
-      (user.followed_by_viewer && user.follows_viewer) ||
-      (user.followed_by_viewer && user.follows_viewer === undefined)
-    ) {
-      // Relação mútua
-      relationshipInfo = "<div class='relationship-info'>Mutual</div>";
+    if (caller === "Followers") {
+      if (
+        (user.followed_by_viewer && user.follows_viewer) ||
+        (user.followed_by_viewer && user.follows_viewer === undefined)
+      ) {
+        relationshipInfo = "<div class='relationship-info'>Mutual</div>";
+        buttonLabel = "Unfollow";
+        buttonAction = "unfollow";
+      }
+      if (user.followed_by_viewer && !user.follows_viewer) {
+        relationshipInfo =
+          "<div class='relationship-info'>Not Following You Back</div>";
+        buttonLabel = "Unfollow";
+        buttonAction = "unfollow";
+      }
+      if (
+        (!user.followed_by_viewer && user.follows_viewer === undefined) ||
+        (!user.followed_by_viewer && user.follows_viewer)
+      ) {
+        relationshipInfo =
+          "<div class='relationship-info'>You Don't Follow Back</div>";
+        buttonLabel = "Follow Back";
+        buttonAction = "follow";
+      }
+      if (!user.followed_by_viewer && !user.follows_viewer) {
+        relationshipInfo =
+          "<div class='relationship-info'>You don't follow each other</div>";
+        buttonLabel = "Follow";
+        buttonAction = "follow";
+      }
     }
 
     userDiv.innerHTML = `
@@ -247,7 +264,7 @@ function addUsersToDom(users) {
           user.username
         }/" target="_blank" class="username">@${user.username}</a>
         <div class="full-name">${user.full_name}</div>
-        ${relationshipInfo} <!-- Exibe a informação do relacionamento -->
+        ${relationshipInfo}
       </div>
       <button class="action-button" data-id="${
         user.id
@@ -261,12 +278,11 @@ function addUsersToDom(users) {
 
 function attachButtonListeners() {
   document.querySelectorAll(".action-button").forEach((button) => {
-    button.removeEventListener("click", handleActionButtonClick); // Remove listener to avoid duplicates
+    button.removeEventListener("click", handleActionButtonClick);
     button.addEventListener("click", handleActionButtonClick);
   });
 }
 
-// Extração de informações relevantes da página
 const viewerIdMatch = document.body.innerHTML.match(/"viewerId":"(\w+)"/i);
 const appScopedIdentityMatch = document.body.innerHTML.match(
   /"appScopedIdentity":"(\w+)"/i
@@ -285,15 +301,13 @@ let viewerId = viewerIdMatch ? viewerIdMatch[1] : null;
 viewerId =
   viewerId || (appScopedIdentityMatch ? appScopedIdentityMatch[1] : null);
 
-// Preparação dos cabeçalhos para a requisição
 const headers = {
   "Content-Type": "application/x-www-form-urlencoded",
   "X-Requested-With": "XMLHttpRequest",
-  "X-Asbd-Id": "129477", // Valor estático, verifique se está correto para o seu caso
+  "X-Asbd-Id": "129477",
   "X-Ig-Www-Claim": sessionStorage.getItem("www-claim-v2") || "",
 };
 
-// Adicionando tokens e IDs extraídos aos cabeçalhos, se disponíveis
 if (csrfTokenMatch) {
   headers["X-Csrftoken"] = csrfTokenMatch[0];
 }
@@ -304,22 +318,52 @@ if (rolloutHashMatch) {
   headers["X-Instagram-Ajax"] = rolloutHashMatch[0];
 }
 
-function handleActionButtonClick(event) {
+function isWithinLimit(actionType) {
+  const now = Date.now();
+  const oneMinuteAgo = now - 60000;
+  const oneHourAgo = now - 3600000;
+
+  followUnfollowAttempts[actionType] = followUnfollowAttempts[
+    actionType
+  ].filter((timestamp) => timestamp >= oneHourAgo);
+
+  const attemptsLastMinute = followUnfollowAttempts[actionType].filter(
+    (timestamp) => timestamp >= oneMinuteAgo
+  ).length;
+  const attemptsLastHour = followUnfollowAttempts[actionType].length;
+
+  if (attemptsLastMinute >= 5) {
+    alert(
+      `You have reached the limit of ${actionType} actions per minute (5 actions per minute). Please wait before trying again.`
+    );
+    return false;
+  } else if (attemptsLastHour >= 60) {
+    alert(
+      `You have reached the limit of ${actionType} actions per hour (60 actions per hour). Please wait before trying again.`
+    );
+    return false;
+  }
+
+  followUnfollowAttempts[actionType].push(now);
+  return true;
+}
+
+const handleActionButtonClick = async (event) => {
   const userId = event.target.getAttribute("data-id");
   const action = event.target.getAttribute("data-action");
+  if (!isWithinLimit(action)) return;
 
   if (action === "follow") {
-    followUser(userId, event.target);
+    await followUser(userId, event.target);
   } else if (action === "unfollow") {
-    unfollowUser(userId, event.target);
+    await unfollowUser(userId, event.target);
   }
-}
+};
 
 function updateRelationshipInfo(userId, newStatus) {
   const userDiv = document.querySelector(`div.user[data-id="${userId}"]`);
   const relationshipInfoDiv = userDiv.querySelector(".relationship-info");
   const userActionButton = userDiv.querySelector(".action-button");
-
   const user = loadedUsers.get(userId);
 
   if (caller === "Followers") {
@@ -334,113 +378,115 @@ function updateRelationshipInfo(userId, newStatus) {
 
   if (caller === "Following") {
     if (newStatus === "follow") {
-      if (user.followed_by_viewer && user.follows_viewer) {
-        relationshipInfoDiv.innerHTML = "Mutual";
-        userActionButton.textContent = "Unfollow";
-      }
-      if (user.followed_by_viewer && !user.follows_viewer) {
-        relationshipInfoDiv.innerHTML = "Not Following You Back";
-        userActionButton.textContent = "Unfollow";
-      }
+      relationshipInfoDiv.innerHTML =
+        user.followed_by_viewer && !user.follows_viewer
+          ? "Not Following You Back"
+          : "Mutual";
+      userActionButton.textContent = "Unfollow";
     } else if (newStatus === "unfollow") {
-      if (user.followed_by_viewer && user.follows_viewer) {
-        relationshipInfoDiv.innerHTML = "You Don't Follow Back";
-        userActionButton.textContent = "Follow Back";
-      } else if (user.followed_by_viewer && !user.follows_viewer) {
-        relationshipInfoDiv.innerHTML = "Not Following You Back";
-        userActionButton.textContent = "Follow";
-      }
+      relationshipInfoDiv.innerHTML =
+        !user.followed_by_viewer && user.follows_viewer
+          ? "You Don't Follow Back"
+          : "Not Following You Back";
+      userActionButton.textContent = "Follow";
     }
   }
 }
 
-function followUser(userId, button) {
+const followUser = async (userId, button) => {
   button.disabled = true;
-  fetch(`https://i.instagram.com/api/v1/web/friendships/${userId}/follow/`, {
-    method: "POST",
-    headers: headers,
-    credentials: "include",
-    mode: "cors",
-  })
-    .then((response) => {
-      if (response.ok) {
-        console.log("User followed successfully.");
-        button.setAttribute("data-action", "unfollow");
-        updateRelationshipInfo(userId, "follow");
-        // Atualizações adicionais na UI podem ser feitas aqui
-      } else {
-        console.error("Error trying to follow the user.");
+  try {
+    const response = await fetch(
+      `https://i.instagram.com/api/v1/web/friendships/${userId}/follow/`,
+      {
+        method: "POST",
+        headers: headers,
+        credentials: "include",
+        mode: "cors",
       }
-    })
-    .catch((error) => console.error("Error in the request:", error))
-    .finally(() => {
-      button.disabled = false;
-    });
-}
+    );
+    if (response.ok) {
+      console.log("User followed successfully.");
+      button.setAttribute("data-action", "unfollow");
+      const user = loadedUsers.get(userId);
+      user.followed_by_viewer = true;
+      updateRelationshipInfo(userId, "follow");
+    } else {
+      alert(
+        "Error trying to follow the user. This may be due to reaching the limit of 5 actions per minute or 60 actions per hour. Please wait a moment before trying again."
+      );
+    }
+  } catch (error) {
+    alert("Error trying to follow the user. Try again later.");
+    console.error("Error in the request:", error);
+  } finally {
+    button.disabled = false;
+  }
+};
 
-function unfollowUser(userId, button) {
+const unfollowUser = async (userId, button) => {
   button.disabled = true;
-  fetch(`https://i.instagram.com/api/v1/web/friendships/${userId}/unfollow/`, {
-    method: "POST",
-    headers: headers,
-    credentials: "include",
-    mode: "cors",
-  })
-    .then((response) => {
-      if (response.ok) {
-        console.log("User unfollowed successfully.");
-        button.setAttribute("data-action", "follow");
-        updateRelationshipInfo(userId, "unfollow");
-        // Atualizações adicionais na UI podem ser feitas aqui
-      } else {
-        console.error("Error trying to unfollow the user.");
+  try {
+    const response = await fetch(
+      `https://i.instagram.com/api/v1/web/friendships/${userId}/unfollow/`,
+      {
+        method: "POST",
+        headers: headers,
+        credentials: "include",
+        mode: "cors",
       }
-    })
-    .catch((error) => console.error("Error in the request:", error))
-    .finally(() => {
-      button.disabled = false;
-    });
-}
+    );
+    if (response.ok) {
+      console.log("User unfollowed successfully.");
+      button.setAttribute("data-action", "follow");
+      const user = loadedUsers.get(userId);
+      user.followed_by_viewer = false;
+      updateRelationshipInfo(userId, "unfollow");
+    } else {
+      alert(
+        "Error trying to unfollow the user. This may be due to reaching the limit of 5 actions per minute or 60 actions per hour. Please wait a moment before trying again."
+      );
+    }
+  } catch (error) {
+    alert("Error trying to unfollow the user. Try again later.");
+    console.error("Error in the request:", error);
+  } finally {
+    button.disabled = false;
+  }
+};
 
-// Ajusta o evento do botão de filtro para alternar entre aplicar e remover o filtro
 document
   .getElementById("filterNotFollowingBackButton")
   .addEventListener("click", function () {
-    const button = this; // Referência ao botão clicado
+    const button = this;
     if (currentFilter === "notFollowingBack") {
-      // Se o filtro atual está ativo, desativa-o
       currentFilter = null;
-      button.textContent = "Filter Non-Followers"; // Atualiza o texto do botão
+      button.textContent = "Filter Non-Followers";
       button.classList.remove("filter-active");
-      // Chama updateUIWithData sem aplicar o filtro, pois queremos remover o filtro
       currentFilteredUsers = null;
-      updateUIWithData([...loadedUsers.values()], caller); // Pode precisar ajustar essa chamada conforme sua lógica de dados
+      updateUIWithData([...loadedUsers.values()], caller);
     } else {
-      // Ativa o filtro
       currentFilter = "notFollowingBack";
-      button.textContent = "Remove Filter"; // Atualiza o texto do botão
+      button.textContent = "Remove Filter";
       button.classList.add("filter-active");
-      // Aplica o filtro com base no contexto atual (Following ou Followers)
-      updateUIWithData([...loadedUsers.values()], caller); // Ajuste conforme necessário
+      updateUIWithData([...loadedUsers.values()], caller);
     }
   });
 
 document
   .getElementById("filterNotFollowedBackButton")
   .addEventListener("click", function () {
-    const button = this; // Referência ao botão clicado
+    const button = this;
     if (currentFilter === "notFollowedBack") {
       currentFilter = null;
       button.textContent = "Filter Not Followed Back";
       button.classList.remove("filter-active");
-      // Limpa o filtro e atualiza a UI
       currentFilteredUsers = null;
       updateUIWithData([...loadedUsers.values()], caller);
     } else {
       currentFilter = "notFollowedBack";
       button.textContent = "Remove Filter";
       button.classList.add("filter-active");
-      // Aplica o filtro e atualiza a UI
       updateUIWithData([...loadedUsers.values()], caller);
     }
   });
