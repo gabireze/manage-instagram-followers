@@ -81,8 +81,9 @@ document.getElementById("searchInput").addEventListener("input", function (e) {
 const fetchFollowing = async () => {
   const loader = document.getElementById("loader");
   loader.style.display = "block";
-  document.getElementById("loadFollowingButton").disabled = true;
-  document.getElementById("loadFollowingButton").style.cursor = "not-allowed";
+  const loadFollowingButton = document.getElementById("loadFollowingButton");
+  loadFollowingButton.disabled = true;
+  loadFollowingButton.style.cursor = "not-allowed";
   try {
     const variables = {
       id: "240664985",
@@ -114,16 +115,17 @@ const fetchFollowing = async () => {
     console.error("Error when fetching data from Instagram:", error);
   } finally {
     loader.style.display = "none";
-    document.getElementById("loadFollowingButton").disabled = false;
-    document.getElementById("loadFollowingButton").style.cursor = "pointer";
+    loadFollowingButton.disabled = false;
+    loadFollowingButton.style.cursor = "pointer";
   }
 };
 
 const fetchFollowers = async () => {
   const loader = document.getElementById("loader");
   loader.style.display = "block";
-  document.getElementById("loadFollowersButton").disabled = true;
-  document.getElementById("loadFollowersButton").style.cursor = "not-allowed";
+  const loadFollowersButton = document.getElementById("loadFollowersButton");
+  loadFollowersButton.disabled = true;
+  loadFollowersButton.style.cursor = "not-allowed";
   try {
     const variables = {
       id: "240664985",
@@ -157,19 +159,20 @@ const fetchFollowers = async () => {
     console.error("Error when fetching data from Instagram:", error);
   } finally {
     loader.style.display = "none";
-    document.getElementById("loadFollowersButton").disabled = false;
-    document.getElementById("loadFollowersButton").style.cursor = "pointer";
+    loadFollowersButton.disabled = false;
+    loadFollowersButton.style.cursor = "pointer";
   }
 };
 
 function updateUIWithData(edges, functionCalled) {
   document.getElementById("searchInput").style.display = "block";
+  const userList = document.getElementById("userList");
   populateLoadedUser(edges, functionCalled);
   if (currentFilter === "notFollowingBack" && functionCalled === "Following") {
     currentFilteredUsers = [...loadedUsers.values()].filter(
       (user) => !user.follows_viewer && user.followed_by_viewer
     );
-    document.getElementById("userList").innerHTML = "";
+    userList.innerHTML = "";
     addUsersToDom(currentFilteredUsers);
   } else if (
     currentFilter === "notFollowedBack" &&
@@ -178,10 +181,10 @@ function updateUIWithData(edges, functionCalled) {
     currentFilteredUsers = [...loadedUsers.values()].filter(
       (user) => !user.followed_by_viewer
     );
-    document.getElementById("userList").innerHTML = "";
+    userList.innerHTML = "";
     addUsersToDom(currentFilteredUsers);
   } else {
-    document.getElementById("userList").innerHTML = "";
+    userList.innerHTML = "";
     addUsersToDom([...loadedUsers.values()]);
   }
 }
