@@ -1,4 +1,5 @@
 document.getElementById("loadFollowersButton").addEventListener("click", () => {
+  loadedUsers.clear();
   fetchFollowers();
   currentFilter = null;
   document
@@ -12,6 +13,7 @@ document.getElementById("loadFollowersButton").addEventListener("click", () => {
 });
 
 document.getElementById("loadFollowingButton").addEventListener("click", () => {
+  loadedUsers.clear();
   fetchFollowing();
   currentFilter = null;
   document
@@ -181,7 +183,6 @@ function updateUIWithData(edges, functionCalled) {
 
 function populateLoadedUser(users, functionCalled) {
   if (caller !== functionCalled) {
-    loadedUsers.clear();
     caller = functionCalled;
   }
   users.forEach((edge) => {
@@ -203,6 +204,7 @@ function addUsersToDom(users) {
   users.forEach((user) => {
     const userDiv = document.createElement("div");
     userDiv.classList.add("user");
+    userDiv.setAttribute("data-id", user.id);
     let buttonLabel = "Follow";
     let buttonAction = "follow";
     let relationshipInfo = ""; // Inicia a informação do relacionamento como vazia
