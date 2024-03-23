@@ -291,21 +291,14 @@ function addUsersToDom(users) {
 
     userDiv.innerHTML = `
       <a href="https://www.instagram.com/${user.username}/" target="_blank">
-        <img src="${
-          user.profile_pic_url ??
-          "https://upload.wikimedia.org/wikipedia/commons/2/2c/Default_pfp.svg"
-        }" alt="${user.username}" class="user-photo">
+        <img src="${user.profile_pic_url}" alt="${user.username}" class="user-photo">
       </a>
       <div class="user-details">
-        <a href="https://www.instagram.com/${
-          user.username
-        }/" target="_blank" class="username">@${user.username}</a>
+        <a href="https://www.instagram.com/${user.username}/" target="_blank" class="username">@${user.username}</a>
         <div class="full-name">${user.full_name}</div>
         ${relationshipInfo}
       </div>
-      <button class="action-button" data-id="${
-        user.id
-      }" data-action="${buttonAction}">${buttonLabel}</button>
+      <button class="action-button" data-id="${user.id}" data-action="${buttonAction}">${buttonLabel}</button>
     `;
     usersList.appendChild(userDiv);
   });
