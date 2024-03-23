@@ -1,6 +1,6 @@
 {
   "name": "Manage Instagram Followers",
-  "description": "A Chrome extension to manage your Instagram followers, including features to follow back, unfollow non-followers, and discover mutual followers.",
+  "description": "Manage your Instagram followers, including features to follow back, unfollow non-followers, and discover mutual followers.",
   "version": "1.0.0",
   "author": {
     "name": "Gabriel de Rezende Gonçalves",
