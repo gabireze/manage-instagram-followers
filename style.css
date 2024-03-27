@@ -148,6 +148,8 @@
 .user-details {
   flex-grow: 1;
   margin-right: 15px;
+  max-width: 154px;
+  text-wrap: pretty;
 }
 
 .username {

@@ -34,12 +34,26 @@ function toggleFilterButtons({
 }
 
 loadFollowersButton.addEventListener("click", () => {
+  if (!viewerId) {
+    document.getElementById("info-text").textContent =
+      "You must be logged in to manage your Instagram followers.";
+    loadFollowingButton.remove();
+    loadFollowersButton.remove();
+    return;
+  }
   resetUI();
   fetchFollowers();
   toggleFilterButtons({ followedBackText: "Filter Not Followed Back" });
 });
 
 loadFollowingButton.addEventListener("click", () => {
+  if (!viewerId) {
+    document.getElementById("info-text").textContent =
+      "You must be logged in to manage your Instagram followers.";
+    loadFollowingButton.remove();
+    loadFollowersButton.remove();
+    return;
+  }
   resetUI();
   fetchFollowing();
   toggleFilterButtons({
@@ -94,7 +108,7 @@ const fetchFollowing = async () => {
   });
   try {
     const variables = {
-      id: "240664985",
+      id: viewerId,
       include_reel: false,
       fetch_mutual: false,
       first: 50,
@@ -119,16 +133,14 @@ const fetchFollowing = async () => {
     if (hasNextPage) {
       fetchFollowing();
     }
-    if (!endCursor) {
-      loader.style.display = "none";
-      document.querySelectorAll(".my-component button").forEach((element) => {
-        element.disabled = false;
-        element.style.cursor = "pointer";
-      });
-    }
   } catch (error) {
     console.error("Error when fetching data from Instagram:", error);
   } finally {
+    loader.style.display = "none";
+    document.querySelectorAll(".my-component button").forEach((element) => {
+      element.disabled = false;
+      element.style.cursor = "pointer";
+    });
   }
 };
 
@@ -140,7 +152,7 @@ const fetchFollowers = async () => {
   loadFollowersButton.style.cursor = "not-allowed";
   try {
     const variables = {
-      id: "240664985",
+      id: viewerId,
       include_reel: false,
       fetch_mutual: false,
       first: 50,
@@ -171,8 +183,10 @@ const fetchFollowers = async () => {
     console.error("Error when fetching data from Instagram:", error);
   } finally {
     loader.style.display = "none";
-    loadFollowersButton.disabled = false;
-    loadFollowersButton.style.cursor = "pointer";
+    document.querySelectorAll(".my-component button").forEach((element) => {
+      element.disabled = false;
+      element.style.cursor = "pointer";
+    });
   }
 };
 
