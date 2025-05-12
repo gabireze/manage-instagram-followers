@@ -105,7 +105,7 @@
 }
 
 .my-component #titleAndFilter {
-  display: flex;
+  display: none;
   justify-content: space-between;
   align-items: center;
   width: 100%;
@@ -197,4 +197,64 @@
   border-color: #6b6b6b;
   border-style: none;
   padding: 3px 8px;
+}
+
+.input-group {
+  display: none;
+  width: 100%;
+}
+
+.advanced-toggle {
+  display: none;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+  font-size: 0.9em;
+  color: #aaa;
+  width: 100%;
+  justify-content: flex-start;
+  position: relative;
+}
+
+#advancedModeToggle {
+  transform: scale(1.2);
+  cursor: pointer;
+}
+
+.danger-indicator {
+  display: none;
+  color: #f87171;
+  font-size: 1.2em;
+  margin-left: auto;
+}
+
+.advanced-mode-active .danger-indicator {
+  display: inline-block;
+  animation: blink 1.2s infinite;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+.action-buttons {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+  margin-top: 10px;
+}
+
+.filter-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.user .username {
+  color: #93c5fd;
+  text-decoration: none;
+}
+
+.user .username:hover {
+  text-decoration: underline;
 }

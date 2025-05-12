@@ -1,5 +1,9 @@
 const loadFollowersButton = document.getElementById("loadFollowersButton");
 const loadFollowingButton = document.getElementById("loadFollowingButton");
+const advancedToggleGroup = document.getElementById("advancedToggleGroup");
+const searchGroup = document.getElementById("searchGroup");
+const titleAndFilter = document.getElementById("titleAndFilter");
+let advancedModeEnabled = false;
 const filterNotFollowingBackButton = document.getElementById(
   "filterNotFollowingBackButton"
 );
@@ -19,6 +23,9 @@ function resetUI() {
     .querySelectorAll(".filter")
     .forEach((element) => element.classList.remove("filter-active"));
   infoText.style.display = "none";
+  advancedToggleGroup.style.display = "flex";
+  searchGroup.style.display = "flex";
+  titleAndFilter.style.display = "flex";
 }
 
 function toggleFilterButtons({
@@ -32,6 +39,13 @@ function toggleFilterButtons({
     filterNotFollowedBackButton.textContent = followedBackText;
   }
 }
+
+document
+  .getElementById("advancedModeToggle")
+  .addEventListener("change", function (e) {
+    advancedModeEnabled = e.target.checked;
+    console.log("Advanced Mode:", advancedModeEnabled);
+  });
 
 loadFollowersButton.addEventListener("click", () => {
   if (!viewerId) {
@@ -295,10 +309,20 @@ function addUsersToDom(users) {
     userDiv.classList.add("user");
     userDiv.setAttribute("data-id", user.id);
 
-    const relationState =
-      relationshipConfig[caller][!!user.followed_by_viewer][
-        user.follows_viewer
-      ];
+    let relationState;
+
+    if (user.requested_by_viewer) {
+      relationState = {
+        info: "Follow Request Sent",
+        label: "Cancel Request",
+        action: "unfollow", // ainda usaremos "unfollow" para cancelar
+      };
+    } else {
+      relationState =
+        relationshipConfig[caller][!!user.followed_by_viewer][
+          user.follows_viewer
+        ];
+    }
     const relationshipInfo = `<div class='relationship-info'>${relationState.info}</div>`;
     const buttonLabel = relationState.label;
     const buttonAction = relationState.action;
@@ -363,6 +387,8 @@ if (rolloutHashMatch) {
 }
 
 function isWithinLimit(actionType) {
+  if (advancedModeEnabled) return true;
+
   const now = Date.now();
   const oneMinuteAgo = now - 60000;
   const oneHourAgo = now - 3600000;
@@ -378,12 +404,12 @@ function isWithinLimit(actionType) {
 
   if (attemptsLastMinute >= 5) {
     alert(
-      `You have reached the limit of ${actionType} actions per minute (5 actions per minute). Please wait before trying again.`
+      `You have reached the limit of ${actionType} actions per minute. Please wait.`
     );
     return false;
   } else if (attemptsLastHour >= 60) {
     alert(
-      `You have reached the limit of ${actionType} actions per hour (60 actions per hour). Please wait before trying again.`
+      `You have reached the limit of ${actionType} actions per hour. Please wait.`
     );
     return false;
   }
@@ -406,17 +432,29 @@ const handleActionButtonClick = async (event) => {
 
 function updateRelationshipInfo(userId, newStatus) {
   const userDiv = document.querySelector(`div.user[data-id="${userId}"]`);
+  if (!userDiv) return;
+
   const relationshipInfoDiv = userDiv.querySelector(".relationship-info");
   const userActionButton = userDiv.querySelector(".action-button");
   const user = loadedUsers.get(userId);
+  if (!user) return;
+
+  if (user.requested_by_viewer) {
+    relationshipInfoDiv.innerHTML = "Follow Request Sent";
+    userActionButton.textContent = "Cancel Request";
+    userActionButton.setAttribute("data-action", "unfollow");
+    return;
+  }
 
   if (caller === "Followers") {
     if (newStatus === "follow") {
       relationshipInfoDiv.innerHTML = "Mutual";
       userActionButton.textContent = "Unfollow";
+      userActionButton.setAttribute("data-action", "unfollow");
     } else if (newStatus === "unfollow") {
       relationshipInfoDiv.innerHTML = "You Don't Follow Back";
       userActionButton.textContent = "Follow Back";
+      userActionButton.setAttribute("data-action", "follow");
     }
   }
 
@@ -427,12 +465,14 @@ function updateRelationshipInfo(userId, newStatus) {
           ? "Not Following You Back"
           : "Mutual";
       userActionButton.textContent = "Unfollow";
+      userActionButton.setAttribute("data-action", "unfollow");
     } else if (newStatus === "unfollow") {
       relationshipInfoDiv.innerHTML =
         !user.followed_by_viewer && user.follows_viewer
           ? "You Don't Follow Back"
           : "Not Following You Back";
       userActionButton.textContent = "Follow";
+      userActionButton.setAttribute("data-action", "follow");
     }
   }
 }
@@ -454,6 +494,7 @@ const followUser = async (userId, button) => {
       button.setAttribute("data-action", "unfollow");
       const user = loadedUsers.get(userId);
       user.followed_by_viewer = true;
+      user.requested_by_viewer = false;
       updateRelationshipInfo(userId, "follow");
     } else {
       alert(
@@ -485,6 +526,7 @@ const unfollowUser = async (userId, button) => {
       button.setAttribute("data-action", "follow");
       const user = loadedUsers.get(userId);
       user.followed_by_viewer = false;
+      user.requested_by_viewer = false;
       updateRelationshipInfo(userId, "unfollow");
     } else {
       alert(
