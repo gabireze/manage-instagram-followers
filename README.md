@@ -4,6 +4,11 @@
 
 ---
 
+## GitAds Sponsored
+[![Sponsored by GitAds](https://gitads.dev/v1/ad-serve?source=gabireze/manage-instagram-followers@github)](https://gitads.dev/v1/ad-track?source=gabireze/manage-instagram-followers@github)
+
+---
+
 ## Features
 
 - **Follow Back** – Easily follow users who recently followed you.
@@ -56,10 +61,5 @@ Contributions are welcome. If you have suggestions or improvements, feel free to
 ## License
 
 This project is licensed under the MIT License. For details, see the [LICENSE](https://opensource.org/licenses/MIT) file.
-
----
-
-## GitAds Sponsored
-[![Sponsored by GitAds](https://gitads.dev/v1/ad-serve?source=gabireze/manage-instagram-followers@github)](https://gitads.dev/v1/ad-track?source=gabireze/manage-instagram-followers@github)
 
 <!-- GitAds-Verify: DZ1GIX51I6IU89RM199KZPDB8HHT1THS -->
