@@ -16,7 +16,11 @@ const title = document.getElementById("title");
 
 function resetUI() {
   loadedUsers.clear();
+  connectionCache.Following = null;
+  connectionCache.Followers = null;
   currentFilter = null;
+  currentFilteredUsers = null;
+  document.getElementById("userList").innerHTML = "";
   title.textContent = caller === "Followers" ? "Followers" : "Following";
   title.style.display = "flex";
   document
@@ -47,7 +51,7 @@ document
     console.log("Advanced Mode:", advancedModeEnabled);
   });
 
-loadFollowersButton.addEventListener("click", () => {
+loadFollowersButton.addEventListener("click", async () => {
   if (!viewerId) {
     document.getElementById("info-text").textContent =
       "You must be logged in to manage your Instagram followers.";
@@ -56,11 +60,11 @@ loadFollowersButton.addEventListener("click", () => {
     return;
   }
   resetUI();
-  fetchFollowers();
+  await fetchFollowers();
   toggleFilterButtons({ followedBackText: "Filter Not Followed Back" });
 });
 
-loadFollowingButton.addEventListener("click", () => {
+loadFollowingButton.addEventListener("click", async () => {
   if (!viewerId) {
     document.getElementById("info-text").textContent =
       "You must be logged in to manage your Instagram followers.";
@@ -69,7 +73,7 @@ loadFollowingButton.addEventListener("click", () => {
     return;
   }
   resetUI();
-  fetchFollowing();
+  await fetchFollowing();
   toggleFilterButtons({
     followingBackDisplay: "flex",
     followedBackDisplay: "none",
@@ -83,8 +87,11 @@ overlay.addEventListener("click", function (event) {
   }
 });
 
-let endCursor = "";
 const loadedUsers = new Map();
+const connectionCache = {
+  Following: null,
+  Followers: null,
+};
 let filteredUsers = [];
 let caller = null;
 let currentFilteredUsers = null;
@@ -112,97 +119,112 @@ document.getElementById("searchInput").addEventListener("input", function (e) {
   addUsersToDom(filteredUsers);
 });
 
-const fetchFollowing = async () => {
-  const loader = document.getElementById("loader");
-  loader.style.display = "block";
-  const loadFollowingButton = document.getElementById("loadFollowingButton");
-  document.querySelectorAll(".my-component button").forEach((element) => {
-    element.disabled = true;
-    element.style.cursor = "not-allowed";
-  });
-  try {
-    const variables = {
-      id: viewerId,
-      include_reel: false,
-      fetch_mutual: false,
-      first: 50,
-      after: endCursor,
-    };
-    const response = await fetch(
-      `https://www.instagram.com/graphql/query/?query_hash=3dec7e2c57367ef3da3d987d89f9dbc8&variables=${encodeURIComponent(
-        JSON.stringify(variables)
-      )}`
-    );
-    if (!response.ok) {
-      throw new Error(`HTTP Error: ${response.status}`);
-    }
-    const data = await response.json();
-    if (data.data.user.edge_follow.edges.length === 0) {
-      alert("You don't follow anyone or it was not possible to load the data.");
-      return;
-    }
-    endCursor = data.data.user.edge_follow.page_info.end_cursor;
-    const hasNextPage = data.data.user.edge_follow.page_info.has_next_page;
-    updateUIWithData(data.data.user.edge_follow.edges, "Following");
-    if (hasNextPage) {
-      fetchFollowing();
-    }
-  } catch (error) {
-    console.error("Error when fetching data from Instagram:", error);
-  } finally {
-    loader.style.display = "none";
-    document.querySelectorAll(".my-component button").forEach((element) => {
-      element.disabled = false;
-      element.style.cursor = "pointer";
-    });
-  }
-};
+function normalizeConnectionUser(user, type) {
+  const friendship = user.friendship_status || {};
 
-const fetchFollowers = async () => {
+  return {
+    ...user,
+    id: String(user.id || user.pk),
+    followed_by_viewer:
+      user.followed_by_viewer ?? friendship.following ?? type === "Following",
+    follows_viewer:
+      user.follows_viewer ?? friendship.followed_by ?? type === "Followers",
+    requested_by_viewer:
+      user.requested_by_viewer ?? friendship.outgoing_request ?? false,
+  };
+}
+
+function setLoading(isLoading) {
   const loader = document.getElementById("loader");
-  loader.style.display = "block";
-  const loadFollowersButton = document.getElementById("loadFollowersButton");
-  loadFollowersButton.disabled = true;
-  loadFollowersButton.style.cursor = "not-allowed";
-  try {
-    const variables = {
-      id: viewerId,
-      include_reel: false,
-      fetch_mutual: false,
-      first: 50,
-      after: endCursor,
-    };
+  loader.style.display = isLoading ? "block" : "none";
+  document.querySelectorAll(".my-component button").forEach((element) => {
+    element.disabled = isLoading;
+    element.style.cursor = isLoading ? "not-allowed" : "pointer";
+  });
+}
+
+async function requestConnections(type) {
+  const users = [];
+  let nextMaxId = null;
+
+  do {
+    const params = new URLSearchParams({ count: "100" });
+    if (nextMaxId) params.set("max_id", nextMaxId);
+
     const response = await fetch(
-      `https://www.instagram.com/graphql/query/?query_hash=c76146de99bb02f6415203be841dd25a&variables=${encodeURIComponent(
-        JSON.stringify(variables)
-      )}`
+      `/api/v1/friendships/${viewerId}/${type.toLowerCase()}/?${params}`,
+      {
+        credentials: "include",
+        headers,
+      }
     );
-    if (!response.ok) {
-      throw new Error(`HTTP Error: ${response.status}`);
-    }
+
+    if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);
+
     const data = await response.json();
-    if (data.data.user.edge_followed_by.edges.length === 0) {
-      alert(
-        "You don't have any followers or it was not possible to load the data."
-      );
-      return;
+    if (data.status && data.status !== "ok") {
+      throw new Error(data.message || `Instagram returned ${data.status}`);
     }
-    endCursor = data.data.user.edge_followed_by.page_info.end_cursor;
-    const hasNextPage = data.data.user.edge_followed_by.page_info.has_next_page;
-    updateUIWithData(data.data.user.edge_followed_by.edges, "Followers");
-    if (hasNextPage) {
-      fetchFollowers();
+
+    if (Array.isArray(data.users)) {
+      users.push(
+        ...data.users.map((user) => normalizeConnectionUser(user, type))
+      );
+    }
+
+    nextMaxId = data.next_max_id || null;
+  } while (nextMaxId);
+
+  return users;
+}
+
+function refreshRelationshipFlags() {
+  ["Following", "Followers"].forEach((type) => {
+    connectionCache[type]?.forEach((user) => {
+      if (connectionCache.Following) {
+        user.followed_by_viewer = connectionCache.Following.has(user.id);
+      }
+      if (connectionCache.Followers) {
+        user.follows_viewer = connectionCache.Followers.has(user.id);
+      }
+    });
+  });
+}
+
+async function ensureConnections(type) {
+  if (!connectionCache[type]) {
+    const users = await requestConnections(type);
+    connectionCache[type] = new Map(users.map((user) => [user.id, user]));
+    refreshRelationshipFlags();
+  }
+
+  return connectionCache[type];
+}
+
+async function fetchConnections(type) {
+  setLoading(true);
+
+  try {
+    const users = [...(await ensureConnections(type)).values()];
+    loadedUsers.clear();
+
+    if (users.length === 0) {
+      document.getElementById("userList").innerHTML =
+        "<div>No users to show.</div>";
+    } else {
+      updateUIWithData(users, type);
     }
   } catch (error) {
     console.error("Error when fetching data from Instagram:", error);
+    document.getElementById("userList").innerHTML =
+      "<div>Instagram could not load this list. Please try again shortly.</div>";
   } finally {
-    loader.style.display = "none";
-    document.querySelectorAll(".my-component button").forEach((element) => {
-      element.disabled = false;
-      element.style.cursor = "pointer";
-    });
+    setLoading(false);
   }
-};
+}
+
+const fetchFollowing = () => fetchConnections("Following");
+const fetchFollowers = () => fetchConnections("Followers");
 
 function updateUIWithData(edges, functionCalled) {
   document.getElementById("searchInput").style.display = "block";
@@ -358,6 +380,7 @@ const appScopedIdentityMatch = document.body.innerHTML.match(
 const csrfTokenMatch = document.body.innerHTML.match(
   /(?<="csrf_token":").+?(?=")/i
 );
+const csrfCookieMatch = document.cookie.match(/(?:^|;\s*)csrftoken=([^;]+)/i);
 const appIdMatch = document.body.innerHTML.match(
   /(?<="X-IG-App-ID":").+?(?=")/i
 );
@@ -376,12 +399,14 @@ const headers = {
   "X-Ig-Www-Claim": sessionStorage.getItem("www-claim-v2") || "",
 };
 
-if (csrfTokenMatch) {
-  headers["X-Csrftoken"] = csrfTokenMatch[0];
+if (csrfTokenMatch || csrfCookieMatch) {
+  headers["X-Csrftoken"] = csrfTokenMatch
+    ? csrfTokenMatch[0]
+    : decodeURIComponent(csrfCookieMatch[1]);
 }
-if (appIdMatch) {
-  headers["X-Ig-App-Id"] = appIdMatch[0];
-}
+headers["X-Ig-App-Id"] = appIdMatch
+  ? appIdMatch[0]
+  : "936619743392459";
 if (rolloutHashMatch) {
   headers["X-Instagram-Ajax"] = rolloutHashMatch[0];
 }
@@ -477,33 +502,220 @@ function updateRelationshipInfo(userId, newStatus) {
   }
 }
 
+function getInstagramErrorMessage(action, response, data) {
+  const actionLabel = action === "follow" ? "follow" : "unfollow";
+  const reason =
+    data?.feedback_message ||
+    data?.message ||
+    data?.error_type ||
+    `HTTP ${response.status}`;
+  const wasBlocked =
+    response.status === 401 ||
+    response.status === 403 ||
+    response.status === 429 ||
+    data?.feedback_required ||
+    data?.spam ||
+    data?.require_login ||
+    data?.checkpoint_required ||
+    /feedback_required|checkpoint_required|challenge_required|login_required/i.test(
+      reason
+    );
+
+  if (wasBlocked) {
+    return `Instagram blocked the ${actionLabel} request: ${reason}. Advanced Mode only disables this extension's local limits; it cannot bypass Instagram's limits.`;
+  }
+
+  return `Instagram rejected the ${actionLabel} request: ${reason}.`;
+}
+
+function responseMatchesFriendshipAction(data, action) {
+  const relationship = data?.friendship_status || data;
+  const following = relationship?.following;
+  const outgoingRequest = relationship?.outgoing_request;
+
+  if (action === "follow") {
+    return following === true || outgoingRequest === true;
+  }
+
+  return following === false && outgoingRequest !== true;
+}
+
+function getInstagramModule(moduleName) {
+  try {
+    const moduleRequire =
+      typeof require === "function" ? require : window.require;
+    return typeof moduleRequire === "function"
+      ? moduleRequire(moduleName)
+      : null;
+  } catch (error) {
+    console.warn(`Instagram module ${moduleName} is unavailable:`, error);
+    return null;
+  }
+}
+
+function getInstagramNavigationContext() {
+  const navChain = getInstagramModule("IGNavChain")?.getInstance?.();
+  const containerUtils = getInstagramModule("PolarisContainerModuleUtils");
+  const pageId = navChain?.last?.()?.pageID;
+
+  return {
+    container_module:
+      containerUtils?.getContainerModule?.(pageId) || "profile",
+    nav_chain:
+      navChain?.getNavChainForSend?.() ||
+      "PolarisFeedRoot:feedPage:1:via_cold_start",
+  };
+}
+
+async function performNativeInstagramFollow(userId) {
+  const instapi = getInstagramModule("PolarisInstapi");
+  if (!instapi?.apiPost) return { handled: false, data: null };
+
+  const navigation = getInstagramNavigationContext();
+  const response = await instapi.apiPost(
+    "/api/v1/friendships/create/{target_user_id}/",
+    {
+      body: {
+        container_module: navigation.container_module,
+        include_follow_friction_check: true,
+        nav_chain: navigation.nav_chain,
+        user_id: userId,
+      },
+      path: { target_user_id: userId },
+    }
+  );
+
+  return { handled: true, data: response?.data || response };
+}
+
+async function verifyFriendshipAction(userId, action) {
+  for (let attempt = 0; attempt < 8; attempt += 1) {
+    if (attempt > 0) {
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+    }
+
+    const response = await fetch(
+      `/api/v1/friendships/show/${userId}/`,
+      {
+        credentials: "include",
+        headers,
+      }
+    );
+
+    if (!response.ok) continue;
+
+    const data = await response.json();
+    if (responseMatchesFriendshipAction(data, action)) return true;
+  }
+
+  return false;
+}
+
+async function performFriendshipAction(userId, action) {
+  if (action === "follow") {
+    try {
+      const nativeResult = await performNativeInstagramFollow(userId);
+      if (nativeResult.handled) {
+        if (
+          responseMatchesFriendshipAction(nativeResult.data, action) ||
+          (await verifyFriendshipAction(userId, action))
+        ) {
+          return nativeResult.data;
+        }
+
+        throw new Error(
+          "Instagram answered the follow request, but the account relationship did not change."
+        );
+      }
+    } catch (error) {
+      const reason =
+        error?.response?.data?.feedback_message ||
+        error?.response?.data?.message ||
+        error?.message ||
+        "unknown error";
+      throw new Error(`Instagram rejected the follow request: ${reason}`);
+    }
+  }
+
+  const requests =
+    action === "unfollow"
+      ? [
+          {
+            endpoint: `https://i.instagram.com/api/v1/web/friendships/${userId}/unfollow/`,
+          },
+          { endpoint: `/api/v1/friendships/destroy/${userId}/` },
+        ]
+      : [
+          {
+            endpoint: `/api/v1/friendships/create/${userId}/`,
+            body: new URLSearchParams({
+              container_module: "profile",
+              include_follow_friction_check: "true",
+              nav_chain: "PolarisFeedRoot:feedPage:1:via_cold_start",
+              user_id: userId,
+            }),
+          },
+        ];
+  let lastError = null;
+
+  for (const request of requests) {
+    const response = await fetch(request.endpoint, {
+      method: "POST",
+      headers,
+      credentials: "include",
+      body: request.body,
+    });
+
+    let data = null;
+    try {
+      data = await response.json();
+    } catch (error) {
+      console.warn("Instagram returned a non-JSON response:", error);
+    }
+
+    if (!response.ok || data?.status === "fail") {
+      lastError = new Error(getInstagramErrorMessage(action, response, data));
+      if (
+        response.status === 401 ||
+        response.status === 403 ||
+        response.status === 429 ||
+        data?.feedback_required ||
+        data?.checkpoint_required
+      ) {
+        throw lastError;
+      }
+      continue;
+    }
+
+    if (
+      responseMatchesFriendshipAction(data, action) ||
+      (await verifyFriendshipAction(userId, action))
+    ) {
+      return data;
+    }
+
+    lastError = new Error(
+      `Instagram answered the ${action} request, but the account relationship did not change.`
+    );
+  }
+
+  throw lastError || new Error(`Instagram could not complete the ${action} request.`);
+}
+
 const followUser = async (userId, button) => {
   button.disabled = true;
   try {
-    const response = await fetch(
-      `https://i.instagram.com/api/v1/web/friendships/${userId}/follow/`,
-      {
-        method: "POST",
-        headers: headers,
-        credentials: "include",
-        mode: "cors",
-      }
-    );
-    if (response.ok) {
-      console.log("User followed successfully.");
-      button.setAttribute("data-action", "unfollow");
-      const user = loadedUsers.get(userId);
-      user.followed_by_viewer = true;
-      user.requested_by_viewer = false;
-      updateRelationshipInfo(userId, "follow");
-    } else {
-      alert(
-        "Error trying to follow the user. This may be due to reaching the limit of 5 actions per minute or 60 actions per hour. Please wait a moment before trying again."
-      );
-    }
+    await performFriendshipAction(userId, "follow");
+    console.log("User followed successfully.");
+    button.setAttribute("data-action", "unfollow");
+    const user = loadedUsers.get(userId);
+    user.followed_by_viewer = true;
+    user.requested_by_viewer = false;
+    connectionCache.Following?.set(userId, user);
+    updateRelationshipInfo(userId, "follow");
   } catch (error) {
-    alert("Error trying to follow the user. Try again later.");
-    console.error("Error in the request:", error);
+    alert(error.message || "Error trying to follow the user. Try again later.");
+    console.error("Error in the follow request:", error);
   } finally {
     button.disabled = false;
   }
@@ -512,30 +724,17 @@ const followUser = async (userId, button) => {
 const unfollowUser = async (userId, button) => {
   button.disabled = true;
   try {
-    const response = await fetch(
-      `https://i.instagram.com/api/v1/web/friendships/${userId}/unfollow/`,
-      {
-        method: "POST",
-        headers: headers,
-        credentials: "include",
-        mode: "cors",
-      }
-    );
-    if (response.ok) {
-      console.log("User unfollowed successfully.");
-      button.setAttribute("data-action", "follow");
-      const user = loadedUsers.get(userId);
-      user.followed_by_viewer = false;
-      user.requested_by_viewer = false;
-      updateRelationshipInfo(userId, "unfollow");
-    } else {
-      alert(
-        "Error trying to unfollow the user. This may be due to reaching the limit of 5 actions per minute or 60 actions per hour. Please wait a moment before trying again."
-      );
-    }
+    await performFriendshipAction(userId, "unfollow");
+    console.log("User unfollowed successfully.");
+    button.setAttribute("data-action", "follow");
+    const user = loadedUsers.get(userId);
+    user.followed_by_viewer = false;
+    user.requested_by_viewer = false;
+    connectionCache.Following?.delete(userId);
+    updateRelationshipInfo(userId, "unfollow");
   } catch (error) {
-    alert("Error trying to unfollow the user. Try again later.");
-    console.error("Error in the request:", error);
+    alert(error.message || "Error trying to unfollow the user. Try again later.");
+    console.error("Error in the unfollow request:", error);
   } finally {
     button.disabled = false;
   }
@@ -543,7 +742,7 @@ const unfollowUser = async (userId, button) => {
 
 document
   .getElementById("filterNotFollowingBackButton")
-  .addEventListener("click", function () {
+  .addEventListener("click", async function () {
     const button = this;
     if (currentFilter === "notFollowingBack") {
       currentFilter = null;
@@ -552,16 +751,30 @@ document
       currentFilteredUsers = null;
       updateUIWithData([...loadedUsers.values()], caller);
     } else {
-      currentFilter = "notFollowingBack";
-      button.textContent = "Remove Filter";
-      button.classList.add("filter-active");
-      updateUIWithData([...loadedUsers.values()], caller);
+      setLoading(true);
+      try {
+        const followers = await ensureConnections("Followers");
+        currentFilter = "notFollowingBack";
+        currentFilteredUsers = [...loadedUsers.values()].filter(
+          (user) => !followers.has(user.id)
+        );
+        button.textContent = "Remove Filter";
+        button.classList.add("filter-active");
+        document.getElementById("userList").innerHTML = "";
+        addUsersToDom(currentFilteredUsers);
+      } catch (error) {
+        console.error("Error when loading followers for the filter:", error);
+        document.getElementById("userList").innerHTML =
+          "<div>Instagram could not apply this filter. Please try again shortly.</div>";
+      } finally {
+        setLoading(false);
+      }
     }
   });
 
 document
   .getElementById("filterNotFollowedBackButton")
-  .addEventListener("click", function () {
+  .addEventListener("click", async function () {
     const button = this;
     if (currentFilter === "notFollowedBack") {
       currentFilter = null;
@@ -570,9 +783,23 @@ document
       currentFilteredUsers = null;
       updateUIWithData([...loadedUsers.values()], caller);
     } else {
-      currentFilter = "notFollowedBack";
-      button.textContent = "Remove Filter";
-      button.classList.add("filter-active");
-      updateUIWithData([...loadedUsers.values()], caller);
+      setLoading(true);
+      try {
+        const following = await ensureConnections("Following");
+        currentFilter = "notFollowedBack";
+        currentFilteredUsers = [...loadedUsers.values()].filter(
+          (user) => !following.has(user.id)
+        );
+        button.textContent = "Remove Filter";
+        button.classList.add("filter-active");
+        document.getElementById("userList").innerHTML = "";
+        addUsersToDom(currentFilteredUsers);
+      } catch (error) {
+        console.error("Error when loading following for the filter:", error);
+        document.getElementById("userList").innerHTML =
+          "<div>Instagram could not apply this filter. Please try again shortly.</div>";
+      } finally {
+        setLoading(false);
+      }
     }
   });

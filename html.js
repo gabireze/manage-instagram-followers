@@ -21,7 +21,7 @@ const init = () => {
 
       <div class="advanced-toggle" id="advancedToggleGroup">
         <input type="checkbox" id="advancedModeToggle" />
-        <label for="advancedModeToggle">Advanced Mode (disables safety limits)</label>
+        <label for="advancedModeToggle">Advanced Mode (disables extension safety limits)</label>
         <span class="danger-indicator" id="dangerIndicator" title="Safety limits disabled">⚠️</span>
       </div>
 
