@@ -1,3 +1,150 @@
+const translations = {
+  en: {
+    appTitle: "Manage Followers",
+    introTitle: "See who doesn’t follow you back.",
+    introBody:
+      "Compare your connections, find non-followers, and clean up your following list.",
+    followingTab: "Following",
+    followersTab: "Followers",
+    listsLabel: "Connection lists",
+    close: "Close",
+    dismiss: "Dismiss message",
+    searchLabel: "Search accounts",
+    searchPlaceholder: "Username or name",
+    nonFollowersFilter: "Not following you",
+    notFollowedBackFilter: "You don’t follow",
+    removeFilter: "Show everyone",
+    advancedTitle: "Advanced mode",
+    advancedSummary: "Extension limits",
+    advancedLabel: "Disable extension safety limits",
+    advancedHelp: "Instagram’s own limits still apply and cannot be bypassed.",
+    footerNote:
+      "Actions are verified with Instagram before the interface changes.",
+    followingTitle: "Following",
+    followersTitle: "Followers",
+    resultCount: "{count} account",
+    resultCountPlural: "{count} accounts",
+    filteredCount: "{count} of {total} accounts",
+    noUsersTitle: "No accounts here",
+    noUsersBody: "Instagram returned an empty list for this view.",
+    noSearchTitle: "No matching accounts",
+    noSearchBody: "Try another username or name.",
+    noFilterTitle: "You’re all caught up",
+    noFilterBody: "No accounts match this filter.",
+    loginRequired:
+      "Log in to Instagram, then reopen the extension to manage your connections.",
+    loadError:
+      "Instagram couldn’t load this list. Wait a moment and try again.",
+    filterError:
+      "Instagram couldn’t compare these lists. Wait a moment and try again.",
+    mutual: "You follow each other",
+    notFollowingYou: "Doesn’t follow you back",
+    youDontFollow: "You don’t follow back",
+    neither: "You don’t follow each other",
+    requestSent: "Follow request sent",
+    follow: "Follow",
+    followBack: "Follow back",
+    unfollow: "Unfollow",
+    cancelRequest: "Cancel request",
+    followingLoading: "Following…",
+    unfollowingLoading: "Unfollowing…",
+    cancellingLoading: "Cancelling…",
+    minuteLimit:
+      "You reached the extension’s {action} limit for one minute. Wait before trying again.",
+    hourLimit:
+      "You reached the extension’s {action} limit for one hour. Wait before trying again.",
+    actionFollow: "follow",
+    actionUnfollow: "unfollow",
+    instagramBlocked:
+      "Instagram blocked the {action} request: {reason}. Advanced mode only disables this extension’s limits.",
+    instagramRejected: "Instagram rejected the {action} request: {reason}.",
+    relationshipUnchanged:
+      "Instagram answered the {action} request, but the relationship didn’t change.",
+    actionFailed: "Instagram couldn’t complete the {action} request.",
+  },
+  pt: {
+    appTitle: "Gerenciar seguidores",
+    introTitle: "Veja quem não segue você de volta.",
+    introBody:
+      "Compare suas conexões, encontre quem não segue você e organize a lista de perfis seguidos.",
+    followingTab: "Seguindo",
+    followersTab: "Seguidores",
+    listsLabel: "Listas de conexões",
+    close: "Fechar",
+    dismiss: "Dispensar mensagem",
+    searchLabel: "Buscar contas",
+    searchPlaceholder: "Nome de usuário ou nome",
+    nonFollowersFilter: "Não seguem você",
+    notFollowedBackFilter: "Você não segue",
+    removeFilter: "Mostrar todos",
+    advancedTitle: "Modo avançado",
+    advancedSummary: "Limites da extensão",
+    advancedLabel: "Desativar limites de segurança da extensão",
+    advancedHelp:
+      "Os limites do Instagram continuam valendo e não podem ser ignorados.",
+    footerNote:
+      "As ações são confirmadas com o Instagram antes de atualizar a interface.",
+    followingTitle: "Seguindo",
+    followersTitle: "Seguidores",
+    resultCount: "{count} conta",
+    resultCountPlural: "{count} contas",
+    filteredCount: "{count} de {total} contas",
+    noUsersTitle: "Nenhuma conta nesta lista",
+    noUsersBody: "O Instagram retornou uma lista vazia para esta visualização.",
+    noSearchTitle: "Nenhuma conta encontrada",
+    noSearchBody: "Tente outro nome de usuário ou nome.",
+    noFilterTitle: "Tudo certo por aqui",
+    noFilterBody: "Nenhuma conta corresponde a este filtro.",
+    loginRequired:
+      "Entre no Instagram e abra a extensão novamente para gerenciar suas conexões.",
+    loadError:
+      "O Instagram não conseguiu carregar esta lista. Aguarde um momento e tente novamente.",
+    filterError:
+      "O Instagram não conseguiu comparar as listas. Aguarde um momento e tente novamente.",
+    mutual: "Vocês se seguem",
+    notFollowingYou: "Não segue você de volta",
+    youDontFollow: "Você não segue de volta",
+    neither: "Vocês não se seguem",
+    requestSent: "Solicitação enviada",
+    follow: "Seguir",
+    followBack: "Seguir de volta",
+    unfollow: "Deixar de seguir",
+    cancelRequest: "Cancelar solicitação",
+    followingLoading: "Seguindo…",
+    unfollowingLoading: "Deixando de seguir…",
+    cancellingLoading: "Cancelando…",
+    minuteLimit:
+      "Você atingiu o limite de ações de {action} por minuto da extensão. Aguarde antes de tentar novamente.",
+    hourLimit:
+      "Você atingiu o limite de ações de {action} por hora da extensão. Aguarde antes de tentar novamente.",
+    actionFollow: "seguir",
+    actionUnfollow: "deixar de seguir",
+    instagramBlocked:
+      "O Instagram bloqueou a ação de {action}: {reason}. O modo avançado desativa apenas os limites da extensão.",
+    instagramRejected: "O Instagram recusou a ação de {action}: {reason}.",
+    relationshipUnchanged:
+      "O Instagram respondeu à ação de {action}, mas a relação entre as contas não mudou.",
+    actionFailed: "O Instagram não conseguiu concluir a ação de {action}.",
+  },
+};
+
+const localeStorageKey = "manageInstagramFollowers.locale";
+let currentLocale = "en";
+
+function t(key, values = {}) {
+  const template = translations[currentLocale]?.[key] || translations.en[key] || key;
+  return Object.entries(values).reduce(
+    (text, [name, value]) => text.replaceAll(`{${name}}`, String(value)),
+    template
+  );
+}
+
+function getPreferredLocale() {
+  const savedLocale = localStorage.getItem(localeStorageKey);
+  if (savedLocale === "en" || savedLocale === "pt") return savedLocale;
+  return navigator.language.toLowerCase().startsWith("pt") ? "pt" : "en";
+}
+
 const loadFollowersButton = document.getElementById("loadFollowersButton");
 const loadFollowingButton = document.getElementById("loadFollowingButton");
 const advancedToggleGroup = document.getElementById("advancedToggleGroup");
@@ -13,34 +160,120 @@ const filterNotFollowedBackButton = document.getElementById(
 const overlay = document.getElementById("overlay");
 const infoText = document.getElementById("info-text");
 const title = document.getElementById("title");
+const workspace = document.getElementById("workspace");
+const userList = document.getElementById("userList");
+const resultsSummary = document.getElementById("resultsSummary");
+const notice = document.getElementById("notice");
+const noticeText = document.getElementById("noticeText");
+
+function setLocale(locale, persist = true) {
+  currentLocale = locale === "pt" ? "pt" : "en";
+  if (persist) localStorage.setItem(localeStorageKey, currentLocale);
+
+  document
+    .getElementById("manage-instagram-followers-root")
+    ?.setAttribute("lang", currentLocale === "pt" ? "pt-BR" : "en");
+
+  document.querySelectorAll("[data-i18n]").forEach((element) => {
+    element.textContent = t(element.dataset.i18n);
+  });
+  document.querySelectorAll("[data-i18n-placeholder]").forEach((element) => {
+    element.placeholder = t(element.dataset.i18nPlaceholder);
+  });
+  document.querySelectorAll("[data-i18n-aria-label]").forEach((element) => {
+    element.setAttribute("aria-label", t(element.dataset.i18nAriaLabel));
+  });
+  document.querySelectorAll(".language-button").forEach((button) => {
+    button.setAttribute(
+      "aria-pressed",
+      String(button.dataset.locale === currentLocale)
+    );
+  });
+
+  filterNotFollowingBackButton.textContent = t(
+    currentFilter === "notFollowingBack"
+      ? "removeFilter"
+      : "nonFollowersFilter"
+  );
+  filterNotFollowedBackButton.textContent = t(
+    currentFilter === "notFollowedBack"
+      ? "removeFilter"
+      : "notFollowedBackFilter"
+  );
+
+  if (caller) {
+    const searchInput = document.getElementById("searchInput");
+    if (searchInput.value.trim()) {
+      searchInput.dispatchEvent(new Event("input", { bubbles: true }));
+    } else {
+      addUsersToDom(currentFilteredUsers || [...loadedUsers.values()]);
+    }
+  }
+}
+
+function showNotice(message, tone = "error") {
+  noticeText.textContent = message;
+  notice.dataset.tone = tone;
+  notice.hidden = false;
+}
+
+function dismissNotice() {
+  notice.hidden = true;
+  noticeText.textContent = "";
+  delete notice.dataset.tone;
+}
+
+function closeExtension() {
+  document.getElementById("manage-instagram-followers-root")?.remove();
+}
+
+document.querySelectorAll(".language-button").forEach((button) => {
+  button.addEventListener("click", () => setLocale(button.dataset.locale));
+});
+document
+  .getElementById("closeExtensionButton")
+  .addEventListener("click", closeExtension);
+document
+  .getElementById("dismissNoticeButton")
+  .addEventListener("click", dismissNotice);
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape") closeExtension();
+});
 
 function resetUI() {
   loadedUsers.clear();
-  connectionCache.Following = null;
-  connectionCache.Followers = null;
   currentFilter = null;
   currentFilteredUsers = null;
   document.getElementById("userList").innerHTML = "";
-  title.textContent = caller === "Followers" ? "Followers" : "Following";
+  document.getElementById("searchInput").value = "";
+  filterNotFollowingBackButton.textContent = t("nonFollowersFilter");
+  filterNotFollowedBackButton.textContent = t("notFollowedBackFilter");
+  title.textContent =
+    caller === "Followers" ? t("followersTitle") : t("followingTitle");
   title.style.display = "flex";
   document
     .querySelectorAll(".filter")
     .forEach((element) => element.classList.remove("filter-active"));
   infoText.style.display = "none";
   advancedToggleGroup.style.display = "flex";
-  searchGroup.style.display = "flex";
+  searchGroup.style.display = "grid";
   titleAndFilter.style.display = "flex";
+  workspace.hidden = false;
+  const introBlock = document.querySelector(".intro-block");
+  introBlock.hidden = true;
+  introBlock.style.display = "none";
+  dismissNotice();
 }
 
 function toggleFilterButtons({
   followingBackDisplay = "none",
   followedBackDisplay = "flex",
-  followedBackText = "",
+  followedBackTextKey = "",
 }) {
   filterNotFollowingBackButton.style.display = followingBackDisplay;
   filterNotFollowedBackButton.style.display = followedBackDisplay;
-  if (followedBackText) {
-    filterNotFollowedBackButton.textContent = followedBackText;
+  if (followedBackTextKey) {
+    filterNotFollowedBackButton.textContent = t(followedBackTextKey);
   }
 }
 
@@ -53,42 +286,55 @@ document
 
 loadFollowersButton.addEventListener("click", async () => {
   if (!viewerId) {
-    document.getElementById("info-text").textContent =
-      "You must be logged in to manage your Instagram followers.";
-    loadFollowingButton.remove();
-    loadFollowersButton.remove();
+    showNotice(t("loginRequired"));
     return;
   }
   resetUI();
+  setActiveListTab("Followers");
   await fetchFollowers();
-  toggleFilterButtons({ followedBackText: "Filter Not Followed Back" });
+  toggleFilterButtons({ followedBackTextKey: "notFollowedBackFilter" });
 });
 
 loadFollowingButton.addEventListener("click", async () => {
   if (!viewerId) {
-    document.getElementById("info-text").textContent =
-      "You must be logged in to manage your Instagram followers.";
-    loadFollowingButton.remove();
-    loadFollowersButton.remove();
+    showNotice(t("loginRequired"));
     return;
   }
   resetUI();
+  setActiveListTab("Following");
   await fetchFollowing();
   toggleFilterButtons({
     followingBackDisplay: "flex",
     followedBackDisplay: "none",
-    followedBackText: "Filter Non-Followers",
+    followedBackTextKey: "nonFollowersFilter",
   });
 });
 
+function setActiveListTab(type) {
+  loadFollowingButton.classList.toggle("is-active", type === "Following");
+  loadFollowersButton.classList.toggle("is-active", type === "Followers");
+  loadFollowingButton.setAttribute(
+    "aria-current",
+    type === "Following" ? "page" : "false"
+  );
+  loadFollowersButton.setAttribute(
+    "aria-current",
+    type === "Followers" ? "page" : "false"
+  );
+}
+
 overlay.addEventListener("click", function (event) {
   if (event.target === this) {
-    this.style.display = "none";
+    closeExtension();
   }
 });
 
 const loadedUsers = new Map();
 const connectionCache = {
+  Following: null,
+  Followers: null,
+};
+const connectionRequests = {
   Following: null,
   Followers: null,
 };
@@ -102,21 +348,18 @@ let followUnfollowAttempts = {
 };
 
 document.getElementById("searchInput").addEventListener("input", function (e) {
-  const searchTerm = e.target.value.toLowerCase();
-  const usersList = document.getElementById("userList");
+  const searchTerm = e.target.value.trim().toLocaleLowerCase(currentLocale);
   let usersToSearch = currentFilteredUsers || [...loadedUsers.values()];
   if (!searchTerm) {
-    usersList.innerHTML = "";
     addUsersToDom(usersToSearch);
     return;
   }
   filteredUsers = usersToSearch.filter(
     (user) =>
-      user.username.toLowerCase().includes(searchTerm) ||
-      user.full_name.toLowerCase().includes(searchTerm)
+      user.username.toLocaleLowerCase(currentLocale).includes(searchTerm) ||
+      user.full_name.toLocaleLowerCase(currentLocale).includes(searchTerm)
   );
-  usersList.innerHTML = "";
-  addUsersToDom(filteredUsers);
+  addUsersToDom(filteredUsers, filteredUsers.length === 0 ? "search" : null);
 });
 
 function normalizeConnectionUser(user, type) {
@@ -136,11 +379,51 @@ function normalizeConnectionUser(user, type) {
 
 function setLoading(isLoading) {
   const loader = document.getElementById("loader");
-  loader.style.display = isLoading ? "block" : "none";
-  document.querySelectorAll(".my-component button").forEach((element) => {
+  loader.style.display = isLoading ? "flex" : "none";
+  userList.style.display = isLoading ? "none" : caller ? "flex" : "none";
+  document
+    .querySelector(".my-component")
+    ?.setAttribute("aria-busy", String(isLoading));
+  document.querySelectorAll(".data-action-control").forEach((element) => {
     element.disabled = isLoading;
-    element.style.cursor = isLoading ? "not-allowed" : "pointer";
+    element.setAttribute("aria-disabled", String(isLoading));
   });
+}
+
+function updateResultsMeta(users) {
+  const total = loadedUsers.size;
+  const count = users.length;
+  resultsSummary.textContent =
+    currentFilter || count !== total
+      ? t("filteredCount", { count, total })
+      : t(count === 1 ? "resultCount" : "resultCountPlural", { count });
+}
+
+function renderEmptyState(reason = "empty") {
+  const titleKey =
+    reason === "search"
+      ? "noSearchTitle"
+      : reason === "filter"
+      ? "noFilterTitle"
+      : "noUsersTitle";
+  const bodyKey =
+    reason === "search"
+      ? "noSearchBody"
+      : reason === "filter"
+      ? "noFilterBody"
+      : "noUsersBody";
+
+  userList.innerHTML = `
+    <div class="empty-state">
+      <svg viewBox="0 0 24 24" width="24" height="24" fill="none" aria-hidden="true">
+        <circle cx="10" cy="9" r="3.5" stroke="currentColor" stroke-width="1.7" />
+        <path d="M3.5 19c.7-3.1 2.8-4.8 6.5-4.8 2.2 0 3.9.6 5 1.8m2-7 4 4m0-4-4 4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" />
+      </svg>
+      <strong>${t(titleKey)}</strong>
+      <span>${t(bodyKey)}</span>
+    </div>
+  `;
+  userList.style.display = "flex";
 }
 
 async function requestConnections(type) {
@@ -192,32 +475,46 @@ function refreshRelationshipFlags() {
 }
 
 async function ensureConnections(type) {
-  if (!connectionCache[type]) {
-    const users = await requestConnections(type);
-    connectionCache[type] = new Map(users.map((user) => [user.id, user]));
-    refreshRelationshipFlags();
+  if (connectionCache[type]) return connectionCache[type];
+
+  if (!connectionRequests[type]) {
+    connectionRequests[type] = requestConnections(type)
+      .then((users) => {
+        const connections = new Map(users.map((user) => [user.id, user]));
+        connectionCache[type] = connections;
+        return connections;
+      })
+      .finally(() => {
+        connectionRequests[type] = null;
+      });
   }
 
-  return connectionCache[type];
+  const connections = await connectionRequests[type];
+  refreshRelationshipFlags();
+  return connections;
 }
 
 async function fetchConnections(type) {
+  caller = type;
+  title.textContent =
+    type === "Followers" ? t("followersTitle") : t("followingTitle");
   setLoading(true);
 
   try {
-    const users = [...(await ensureConnections(type)).values()];
+    const companionType = type === "Following" ? "Followers" : "Following";
+    const [selectedConnections] = await Promise.all([
+      ensureConnections(type),
+      ensureConnections(companionType),
+    ]);
+    refreshRelationshipFlags();
+    const users = [...selectedConnections.values()];
     loadedUsers.clear();
 
-    if (users.length === 0) {
-      document.getElementById("userList").innerHTML =
-        "<div>No users to show.</div>";
-    } else {
-      updateUIWithData(users, type);
-    }
+    updateUIWithData(users, type);
   } catch (error) {
     console.error("Error when fetching data from Instagram:", error);
-    document.getElementById("userList").innerHTML =
-      "<div>Instagram could not load this list. Please try again shortly.</div>";
+    showNotice(t("loadError"));
+    renderEmptyState();
   } finally {
     setLoading(false);
   }
@@ -228,15 +525,16 @@ const fetchFollowers = () => fetchConnections("Followers");
 
 function updateUIWithData(edges, functionCalled) {
   document.getElementById("searchInput").style.display = "block";
-  const userList = document.getElementById("userList");
 
   populateLoadedUser(edges, functionCalled);
   if (currentFilter === "notFollowingBack" && functionCalled === "Following") {
     currentFilteredUsers = [...loadedUsers.values()].filter(
       (user) => !user.follows_viewer && user.followed_by_viewer
     );
-    userList.innerHTML = "";
-    addUsersToDom(currentFilteredUsers);
+    addUsersToDom(
+      currentFilteredUsers,
+      currentFilteredUsers.length === 0 ? "filter" : null
+    );
   } else if (
     currentFilter === "notFollowedBack" &&
     functionCalled === "Followers"
@@ -244,10 +542,11 @@ function updateUIWithData(edges, functionCalled) {
     currentFilteredUsers = [...loadedUsers.values()].filter(
       (user) => !user.followed_by_viewer
     );
-    userList.innerHTML = "";
-    addUsersToDom(currentFilteredUsers);
+    addUsersToDom(
+      currentFilteredUsers,
+      currentFilteredUsers.length === 0 ? "filter" : null
+    );
   } else {
-    userList.innerHTML = "";
     addUsersToDom([...loadedUsers.values()]);
   }
 }
@@ -264,103 +563,118 @@ function populateLoadedUser(users, functionCalled) {
   });
 }
 
-function addUsersToDom(users) {
-  const usersList = document.getElementById("userList");
-  usersList.innerHTML = "";
-  usersList.style.display = "flex";
-  title.textContent = caller === "Followers" ? "Followers" : "Following";
+function getRelationshipState(user) {
+  if (user.requested_by_viewer) {
+    return {
+      infoKey: "requestSent",
+      labelKey: "cancelRequest",
+      action: "unfollow",
+      tone: "pending",
+    };
+  }
 
-  const relationshipConfig = {
-    Following: {
-      true: {
-        true: { info: "Mutual", label: "Unfollow", action: "unfollow" },
-        false: {
-          info: "Not Following You Back",
-          label: "Unfollow",
-          action: "unfollow",
-        },
-      },
-      false: {
-        true: {
-          info: "You Don't Follow Back",
-          label: "Follow Back",
-          action: "follow",
-        },
-        false: {
-          info: "You don't follow each other",
-          label: "Follow",
-          action: "follow",
-        },
-      },
-    },
-    Followers: {
-      true: {
-        true: { info: "Mutual", label: "Unfollow", action: "unfollow" },
-        false: {
-          info: "Not Following You Back",
-          label: "Unfollow",
-          action: "unfollow",
-        },
-        undefined: { info: "Mutual", label: "Unfollow", action: "unfollow" },
-      },
-      false: {
-        true: {
-          info: "You Don't Follow Back",
-          label: "Follow Back",
-          action: "follow",
-        },
-        false: {
-          info: "You don't follow each other",
-          label: "Follow",
-          action: "follow",
-        },
-        undefined: {
-          info: "You Don't Follow Back",
-          label: "Follow Back",
-          action: "follow",
-        },
-      },
-    },
+  if (user.followed_by_viewer && user.follows_viewer) {
+    return {
+      infoKey: "mutual",
+      labelKey: "unfollow",
+      action: "unfollow",
+      tone: "mutual",
+    };
+  }
+
+  if (user.followed_by_viewer && !user.follows_viewer) {
+    return {
+      infoKey: "notFollowingYou",
+      labelKey: "unfollow",
+      action: "unfollow",
+      tone: "nonFollower",
+    };
+  }
+
+  if (!user.followed_by_viewer && user.follows_viewer) {
+    return {
+      infoKey: "youDontFollow",
+      labelKey: "followBack",
+      action: "follow",
+      tone: "notFollowedBack",
+    };
+  }
+
+  return {
+    infoKey: "neither",
+    labelKey: "follow",
+    action: "follow",
+    tone: "none",
   };
+}
+
+function addUsersToDom(users, emptyReason = null) {
+  userList.innerHTML = "";
+  userList.style.display = "flex";
+  title.textContent =
+    caller === "Followers" ? t("followersTitle") : t("followingTitle");
+  updateResultsMeta(users);
+
   if (users.length === 0) {
-    usersList.innerHTML = "<div>No users to show.</div>";
+    renderEmptyState(emptyReason || (currentFilter ? "filter" : "empty"));
     return;
   }
+
   users.forEach((user) => {
-    const userDiv = document.createElement("div");
-    userDiv.classList.add("user");
-    userDiv.setAttribute("data-id", user.id);
+    const relationState = getRelationshipState(user);
+    const profileUrl = `https://www.instagram.com/${encodeURIComponent(
+      user.username
+    )}/`;
+    const userDiv = document.createElement("article");
+    userDiv.className = "user";
+    userDiv.dataset.id = user.id;
 
-    let relationState;
+    const photoLink = document.createElement("a");
+    photoLink.className = "user-photo-link";
+    photoLink.href = profileUrl;
+    photoLink.target = "_blank";
+    photoLink.rel = "noreferrer";
+    photoLink.setAttribute("aria-label", `@${user.username}`);
 
-    if (user.requested_by_viewer) {
-      relationState = {
-        info: "Follow Request Sent",
-        label: "Cancel Request",
-        action: "unfollow", // ainda usaremos "unfollow" para cancelar
-      };
-    } else {
-      relationState =
-        relationshipConfig[caller][!!user.followed_by_viewer][
-          user.follows_viewer
-        ];
-    }
-    const relationshipInfo = `<div class='relationship-info'>${relationState.info}</div>`;
-    const buttonLabel = relationState.label;
-    const buttonAction = relationState.action;
+    const photo = document.createElement("img");
+    photo.className = "user-photo";
+    photo.src = user.profile_pic_url;
+    photo.alt = "";
+    photo.width = 44;
+    photo.height = 44;
+    photo.loading = "lazy";
+    photoLink.appendChild(photo);
 
-    userDiv.innerHTML = `
-      <a href="https://www.instagram.com/${user.username}/" target="_blank">
-        <img src="${user.profile_pic_url}" alt="${user.username}" class="user-photo">
-      </a>
-      <div class="user-details">
-        <a href="https://www.instagram.com/${user.username}/" target="_blank" class="username">@${user.username}</a>
-        <div class="full-name">${user.full_name}</div>
-        ${relationshipInfo}
-      </div>
-      <button class="action-button" data-id="${user.id}" data-action="${buttonAction}">${buttonLabel}</button>
-    `;
-    usersList.appendChild(userDiv);
+    const details = document.createElement("div");
+    details.className = "user-details";
+
+    const username = document.createElement("a");
+    username.className = "username";
+    username.href = profileUrl;
+    username.target = "_blank";
+    username.rel = "noreferrer";
+    username.textContent = `@${user.username}`;
+
+    const fullName = document.createElement("span");
+    fullName.className = "full-name";
+    fullName.textContent = user.full_name || "";
+
+    const relationshipInfo = document.createElement("span");
+    relationshipInfo.className = "relationship-info";
+    relationshipInfo.dataset.relationship = relationState.tone;
+    relationshipInfo.textContent = t(relationState.infoKey);
+
+    details.append(username, fullName, relationshipInfo);
+
+    const actionButton = document.createElement("button");
+    actionButton.type = "button";
+    actionButton.className = "action-button data-action-control";
+    actionButton.dataset.id = user.id;
+    actionButton.dataset.action = relationState.action;
+    actionButton.textContent = t(relationState.labelKey);
+
+    userDiv.append(photoLink, details, actionButton);
+    userList.appendChild(userDiv);
   });
 
   attachButtonListeners();
@@ -428,13 +742,19 @@ function isWithinLimit(actionType) {
   const attemptsLastHour = followUnfollowAttempts[actionType].length;
 
   if (attemptsLastMinute >= 5) {
-    alert(
-      `You have reached the limit of ${actionType} actions per minute. Please wait.`
+    showNotice(
+      t("minuteLimit", {
+        action: t(actionType === "follow" ? "actionFollow" : "actionUnfollow"),
+      }),
+      "warning"
     );
     return false;
   } else if (attemptsLastHour >= 60) {
-    alert(
-      `You have reached the limit of ${actionType} actions per hour. Please wait.`
+    showNotice(
+      t("hourLimit", {
+        action: t(actionType === "follow" ? "actionFollow" : "actionUnfollow"),
+      }),
+      "warning"
     );
     return false;
   }
@@ -456,7 +776,7 @@ const handleActionButtonClick = async (event) => {
 };
 
 function updateRelationshipInfo(userId, newStatus) {
-  const userDiv = document.querySelector(`div.user[data-id="${userId}"]`);
+  const userDiv = document.querySelector(`.user[data-id="${userId}"]`);
   if (!userDiv) return;
 
   const relationshipInfoDiv = userDiv.querySelector(".relationship-info");
@@ -464,46 +784,16 @@ function updateRelationshipInfo(userId, newStatus) {
   const user = loadedUsers.get(userId);
   if (!user) return;
 
-  if (user.requested_by_viewer) {
-    relationshipInfoDiv.innerHTML = "Follow Request Sent";
-    userActionButton.textContent = "Cancel Request";
-    userActionButton.setAttribute("data-action", "unfollow");
-    return;
-  }
-
-  if (caller === "Followers") {
-    if (newStatus === "follow") {
-      relationshipInfoDiv.innerHTML = "Mutual";
-      userActionButton.textContent = "Unfollow";
-      userActionButton.setAttribute("data-action", "unfollow");
-    } else if (newStatus === "unfollow") {
-      relationshipInfoDiv.innerHTML = "You Don't Follow Back";
-      userActionButton.textContent = "Follow Back";
-      userActionButton.setAttribute("data-action", "follow");
-    }
-  }
-
-  if (caller === "Following") {
-    if (newStatus === "follow") {
-      relationshipInfoDiv.innerHTML =
-        user.followed_by_viewer && !user.follows_viewer
-          ? "Not Following You Back"
-          : "Mutual";
-      userActionButton.textContent = "Unfollow";
-      userActionButton.setAttribute("data-action", "unfollow");
-    } else if (newStatus === "unfollow") {
-      relationshipInfoDiv.innerHTML =
-        !user.followed_by_viewer && user.follows_viewer
-          ? "You Don't Follow Back"
-          : "Not Following You Back";
-      userActionButton.textContent = "Follow";
-      userActionButton.setAttribute("data-action", "follow");
-    }
-  }
+  const relationState = getRelationshipState(user);
+  relationshipInfoDiv.textContent = t(relationState.infoKey);
+  relationshipInfoDiv.dataset.relationship = relationState.tone;
+  userActionButton.textContent = t(relationState.labelKey);
+  userActionButton.setAttribute("data-action", relationState.action);
+  delete userActionButton.dataset.state;
 }
 
 function getInstagramErrorMessage(action, response, data) {
-  const actionLabel = action === "follow" ? "follow" : "unfollow";
+  const actionLabel = t(action === "follow" ? "actionFollow" : "actionUnfollow");
   const reason =
     data?.feedback_message ||
     data?.message ||
@@ -522,10 +812,10 @@ function getInstagramErrorMessage(action, response, data) {
     );
 
   if (wasBlocked) {
-    return `Instagram blocked the ${actionLabel} request: ${reason}. Advanced Mode only disables this extension's local limits; it cannot bypass Instagram's limits.`;
+    return t("instagramBlocked", { action: actionLabel, reason });
   }
 
-  return `Instagram rejected the ${actionLabel} request: ${reason}.`;
+  return t("instagramRejected", { action: actionLabel, reason });
 }
 
 function responseMatchesFriendshipAction(data, action) {
@@ -624,7 +914,7 @@ async function performFriendshipAction(userId, action) {
         }
 
         throw new Error(
-          "Instagram answered the follow request, but the account relationship did not change."
+          t("relationshipUnchanged", { action: t("actionFollow") })
         );
       }
     } catch (error) {
@@ -633,7 +923,9 @@ async function performFriendshipAction(userId, action) {
         error?.response?.data?.message ||
         error?.message ||
         "unknown error";
-      throw new Error(`Instagram rejected the follow request: ${reason}`);
+      throw new Error(
+        t("instagramRejected", { action: t("actionFollow"), reason })
+      );
     }
   }
 
@@ -695,15 +987,27 @@ async function performFriendshipAction(userId, action) {
     }
 
     lastError = new Error(
-      `Instagram answered the ${action} request, but the account relationship did not change.`
+      t("relationshipUnchanged", {
+        action: t(action === "follow" ? "actionFollow" : "actionUnfollow"),
+      })
     );
   }
 
-  throw lastError || new Error(`Instagram could not complete the ${action} request.`);
+  throw (
+    lastError ||
+    new Error(
+      t("actionFailed", {
+        action: t(action === "follow" ? "actionFollow" : "actionUnfollow"),
+      })
+    )
+  );
 }
 
 const followUser = async (userId, button) => {
   button.disabled = true;
+  button.dataset.state = "loading";
+  button.textContent = t("followingLoading");
+  dismissNotice();
   try {
     await performFriendshipAction(userId, "follow");
     console.log("User followed successfully.");
@@ -714,15 +1018,26 @@ const followUser = async (userId, button) => {
     connectionCache.Following?.set(userId, user);
     updateRelationshipInfo(userId, "follow");
   } catch (error) {
-    alert(error.message || "Error trying to follow the user. Try again later.");
+    const user = loadedUsers.get(userId);
+    if (user) button.textContent = t(getRelationshipState(user).labelKey);
+    showNotice(error.message || t("actionFailed", { action: t("actionFollow") }));
     console.error("Error in the follow request:", error);
   } finally {
+    delete button.dataset.state;
     button.disabled = false;
   }
 };
 
 const unfollowUser = async (userId, button) => {
   button.disabled = true;
+  const userBeforeAction = loadedUsers.get(userId);
+  button.dataset.state = "loading";
+  button.textContent = t(
+    userBeforeAction?.requested_by_viewer
+      ? "cancellingLoading"
+      : "unfollowingLoading"
+  );
+  dismissNotice();
   try {
     await performFriendshipAction(userId, "unfollow");
     console.log("User unfollowed successfully.");
@@ -733,9 +1048,14 @@ const unfollowUser = async (userId, button) => {
     connectionCache.Following?.delete(userId);
     updateRelationshipInfo(userId, "unfollow");
   } catch (error) {
-    alert(error.message || "Error trying to unfollow the user. Try again later.");
+    const user = loadedUsers.get(userId);
+    if (user) button.textContent = t(getRelationshipState(user).labelKey);
+    showNotice(
+      error.message || t("actionFailed", { action: t("actionUnfollow") })
+    );
     console.error("Error in the unfollow request:", error);
   } finally {
+    delete button.dataset.state;
     button.disabled = false;
   }
 };
@@ -746,7 +1066,7 @@ document
     const button = this;
     if (currentFilter === "notFollowingBack") {
       currentFilter = null;
-      button.textContent = "Non-Followers";
+      button.textContent = t("nonFollowersFilter");
       button.classList.remove("filter-active");
       currentFilteredUsers = null;
       updateUIWithData([...loadedUsers.values()], caller);
@@ -758,14 +1078,15 @@ document
         currentFilteredUsers = [...loadedUsers.values()].filter(
           (user) => !followers.has(user.id)
         );
-        button.textContent = "Remove Filter";
+        button.textContent = t("removeFilter");
         button.classList.add("filter-active");
-        document.getElementById("userList").innerHTML = "";
-        addUsersToDom(currentFilteredUsers);
+        addUsersToDom(
+          currentFilteredUsers,
+          currentFilteredUsers.length === 0 ? "filter" : null
+        );
       } catch (error) {
         console.error("Error when loading followers for the filter:", error);
-        document.getElementById("userList").innerHTML =
-          "<div>Instagram could not apply this filter. Please try again shortly.</div>";
+        showNotice(t("filterError"));
       } finally {
         setLoading(false);
       }
@@ -778,7 +1099,7 @@ document
     const button = this;
     if (currentFilter === "notFollowedBack") {
       currentFilter = null;
-      button.textContent = "Not Followed Back";
+      button.textContent = t("notFollowedBackFilter");
       button.classList.remove("filter-active");
       currentFilteredUsers = null;
       updateUIWithData([...loadedUsers.values()], caller);
@@ -790,16 +1111,20 @@ document
         currentFilteredUsers = [...loadedUsers.values()].filter(
           (user) => !following.has(user.id)
         );
-        button.textContent = "Remove Filter";
+        button.textContent = t("removeFilter");
         button.classList.add("filter-active");
-        document.getElementById("userList").innerHTML = "";
-        addUsersToDom(currentFilteredUsers);
+        addUsersToDom(
+          currentFilteredUsers,
+          currentFilteredUsers.length === 0 ? "filter" : null
+        );
       } catch (error) {
         console.error("Error when loading following for the filter:", error);
-        document.getElementById("userList").innerHTML =
-          "<div>Instagram could not apply this filter. Please try again shortly.</div>";
+        showNotice(t("filterError"));
       } finally {
         setLoading(false);
       }
     }
   });
+
+setLocale(getPreferredLocale(), false);
+loadFollowingButton.focus({ preventScroll: true });

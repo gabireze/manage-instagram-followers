@@ -1,7 +1,8 @@
 {
-  "name": "Manage Instagram Followers",
-  "description": "Manage your Instagram followers, including features to follow back, unfollow non-followers, and discover mutual followers.",
-  "version": "1.1.7",
+  "name": "__MSG_extensionName__",
+  "description": "__MSG_extensionDescription__",
+  "version": "1.2.0",
+  "default_locale": "en",
   "author": {
     "name": "Gabriel de Rezende Gonçalves",
     "email": "contato@gabireze.com.br",
@@ -23,7 +24,7 @@
       "48": "icon.png",
       "128": "icon.png"
     },
-    "default_title": "Manage Instagram Followers"
+    "default_title": "__MSG_extensionTitle__"
   },
   "web_accessible_resources": [
     {

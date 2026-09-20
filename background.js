@@ -5,7 +5,7 @@ chrome.action.onClicked.addListener(async function () {
       chrome.tabs.onUpdated.addListener(async function b(tabId, changeInfo) {
         if (tabId === tab.id && changeInfo.status === "complete") {
           await chrome.scripting.insertCSS({
-            files: ["style.css"],
+            files: ["tokens.css", "style.css"],
             target: { tabId: tab.id },
           });
           await chrome.scripting.executeScript({
