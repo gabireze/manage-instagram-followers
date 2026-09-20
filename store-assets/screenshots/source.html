@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Manage Instagram Followers — Store Screenshots</title>
+  <style>
+    :root {
+      --bg: #0d0b14;
+      --panel: #15131d;
+      --panel-2: #1c1926;
+      --panel-3: #24202f;
+      --line: #3e384d;
+      --ink: #f7f4ff;
+      --muted: #b9b2c8;
+      --purple: #b7a1ff;
+      --purple-2: #8b6fea;
+      --purple-soft: #29213f;
+      --green: #67dc93;
+      --red: #ff8a8a;
+      --yellow: #f3c96b;
+      --shadow: 0 32px 90px rgba(0,0,0,.48);
+    }
+    * { box-sizing: border-box; }
+    html, body { width: 1280px; height: 800px; margin: 0; overflow: hidden; }
+    body { font-family: Inter, "Segoe UI", Arial, sans-serif; color: var(--ink); background: var(--bg); }
+    button, input { font: inherit; }
+    .slide {
+      position: relative;
+      width: 1280px;
+      height: 800px;
+      display: none;
+      align-items: center;
+      padding: 64px 72px;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at 88% 13%, rgba(139,111,234,.24), transparent 31%),
+        radial-gradient(circle at 12% 92%, rgba(88,64,160,.20), transparent 34%),
+        linear-gradient(135deg, #0b0911 0%, #12101b 55%, #0c0a12 100%);
+    }
+    .slide.active { display: flex; }
+    .slide::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      opacity: .19;
+      background-image: linear-gradient(rgba(255,255,255,.06) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.06) 1px, transparent 1px);
+      background-size: 42px 42px;
+      mask-image: linear-gradient(to bottom, black, transparent 75%);
+    }
+    .orb { position: absolute; border-radius: 999px; filter: blur(2px); pointer-events: none; }
+    .orb.one { width: 320px; height: 320px; top: -160px; right: 110px; border: 1px solid rgba(183,161,255,.24); }
+    .orb.two { width: 510px; height: 510px; bottom: -350px; left: -120px; border: 1px solid rgba(183,161,255,.14); }
+    .copy { position: relative; z-index: 2; width: 44%; padding-right: 52px; }
+    .eyebrow { display: inline-flex; align-items: center; gap: 9px; margin-bottom: 22px; color: var(--purple); font-size: 15px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+    .eyebrow::before { content: ""; width: 25px; height: 2px; border-radius: 2px; background: var(--purple); }
+    h1 { margin: 0; max-width: 620px; font-family: Georgia, "Times New Roman", serif; font-size: 60px; line-height: 1.02; letter-spacing: -.045em; }
+    .copy p { max-width: 500px; margin: 24px 0 0; color: var(--muted); font-size: 22px; line-height: 1.5; }
+    .proof { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 32px; }
+    .proof span { padding: 9px 13px; border: 1px solid var(--line); border-radius: 999px; background: rgba(21,19,29,.76); color: #ddd6eb; font-size: 14px; font-weight: 700; }
+    .visual { position: relative; z-index: 2; width: 56%; min-width: 0; display: flex; justify-content: center; align-items: center; }
+
+    .brand-slide { justify-content: center; text-align: center; }
+    .brand-slide .brand-wrap { position: relative; z-index: 2; display: grid; justify-items: center; }
+    .brand-slide .icon-halo { width: 222px; height: 222px; display: grid; place-items: center; border-radius: 62px; background: linear-gradient(145deg, rgba(183,161,255,.16), rgba(255,255,255,.025)); border: 1px solid rgba(183,161,255,.28); box-shadow: 0 30px 80px rgba(82,57,154,.36), inset 0 1px rgba(255,255,255,.08); }
+    .brand-slide .icon-halo img { width: 154px; height: 154px; image-rendering: auto; }
+    .brand-slide h1 { margin-top: 34px; font-size: 66px; }
+    .brand-slide p { margin: 17px 0 0; color: var(--muted); font-size: 24px; }
+    .brand-slide .pill { margin-top: 30px; display: inline-flex; align-items: center; gap: 9px; padding: 11px 17px; border: 1px solid var(--line); border-radius: 999px; background: rgba(21,19,29,.8); color: #ddd6eb; font-size: 15px; font-weight: 700; }
+    .brand-slide .pill i { width: 8px; height: 8px; border-radius: 50%; background: var(--green); box-shadow: 0 0 18px var(--green); }
+
+    .app {
+      width: 610px;
+      min-height: 560px;
+      overflow: hidden;
+      border: 1px solid #312c3c;
+      border-radius: 28px;
+      background: #0f0d15;
+      box-shadow: var(--shadow), 0 0 0 8px rgba(255,255,255,.018);
+    }
+    .app-header { height: 86px; display: flex; align-items: center; justify-content: space-between; padding: 0 25px; border-bottom: 1px solid #2d2837; }
+    .brand { display: flex; align-items: center; gap: 13px; }
+    .brand img { width: 43px; height: 43px; }
+    .brand strong { display: block; font-family: Georgia, serif; font-size: 18px; }
+    .brand small { display: block; margin-top: 3px; color: var(--muted); font-size: 12px; }
+    .lang { display: flex; gap: 4px; padding: 4px; border: 1px solid var(--line); border-radius: 12px; background: var(--panel); }
+    .lang span { padding: 7px 9px; border-radius: 8px; color: var(--muted); font-size: 12px; font-weight: 800; }
+    .lang .on { background: #312b40; color: var(--ink); }
+    .home { padding: 30px 26px 26px; }
+    .mini-badge { display: inline-block; padding: 7px 10px; border-radius: 999px; background: var(--purple-soft); color: var(--purple); font-size: 12px; font-weight: 800; }
+    .home h2 { margin: 17px 0 10px; font-family: Georgia, serif; font-size: 28px; letter-spacing: -.02em; }
+    .home > p { margin: 0; color: var(--muted); font-size: 15px; line-height: 1.5; }
+    .cta { width: 100%; height: 52px; margin-top: 24px; padding: 0 18px; display: flex; align-items: center; justify-content: space-between; border: 0; border-radius: 14px; color: #181322; background: linear-gradient(135deg, #c0adff, #a68cf6); font-weight: 900; }
+    .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 9px; margin-top: 18px; }
+    .step { min-height: 92px; padding: 13px; border: 1px solid #332e3e; border-radius: 14px; background: var(--panel); }
+    .step b { display: block; color: var(--ink); font-size: 13px; }
+    .step small { display: block; margin-top: 7px; color: var(--muted); font-size: 11px; line-height: 1.35; }
+    .step em { float: left; width: 21px; height: 21px; margin-right: 7px; display: grid; place-items: center; border-radius: 50%; background: #332a4f; color: var(--purple); font-size: 11px; font-style: normal; }
+    .privacy-row { display: flex; align-items: center; gap: 8px; margin-top: 18px; color: var(--muted); font-size: 12px; }
+    .privacy-row .lock { color: var(--green); }
+
+    .list-app { min-height: 592px; }
+    .tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; padding: 17px 25px; border-bottom: 1px solid #2d2837; }
+    .tab { height: 44px; display: grid; place-items: center; border: 1px solid var(--line); border-radius: 14px; color: var(--muted); background: var(--panel); font-size: 13px; font-weight: 800; }
+    .tab.on { border-color: var(--purple-2); background: #251e38; color: var(--ink); }
+    .list-content { padding: 19px 25px; }
+    .list-top { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+    .list-title { display: flex; align-items: center; gap: 10px; }
+    .back { width: 36px; height: 36px; display: grid; place-items: center; border: 1px solid var(--line); border-radius: 11px; color: var(--muted); background: var(--panel); }
+    .list-title h3 { margin: 0; font-size: 18px; }
+    .list-title small { display: block; margin-top: 3px; color: var(--muted); font-size: 11px; }
+    .filters { display: flex; gap: 7px; }
+    .filter { padding: 8px 11px; border: 1px solid var(--line); border-radius: 999px; color: var(--muted); background: transparent; font-size: 11px; font-weight: 800; }
+    .filter.on { border-color: var(--purple-2); color: var(--ink); background: #281f3c; }
+    .tools { display: grid; grid-template-columns: 1fr 130px 38px; gap: 8px; margin: 18px 0 8px; }
+    .tool { height: 40px; display: flex; align-items: center; padding: 0 12px; border: 1px solid var(--line); border-radius: 11px; background: var(--panel); color: var(--muted); font-size: 11px; }
+    .rows { margin-top: 10px; }
+    .row { min-height: 66px; display: grid; grid-template-columns: 39px 1fr auto; align-items: center; gap: 11px; padding: 9px 4px; border-top: 1px solid #292431; }
+    .avatar { width: 39px; height: 39px; border-radius: 50%; background: linear-gradient(145deg, #7b679a, #292231); }
+    .avatar.a2 { background: linear-gradient(145deg, #4a8d89, #202d33); }
+    .avatar.a3 { background: linear-gradient(145deg, #a26767, #332027); }
+    .avatar.a4 { background: linear-gradient(145deg, #957b4f, #342c24); }
+    .identity b { display: block; font-size: 13px; }
+    .relation { display: inline-block; margin-top: 5px; color: var(--muted); font-size: 11px; }
+    .relation.bad { color: #ffaaa2; }
+    .relation.good { color: #83e0a5; }
+    .action { min-width: 88px; padding: 9px 11px; border: 1px solid var(--line); border-radius: 10px; background: var(--panel); color: var(--ink); font-size: 11px; font-weight: 800; }
+
+    .batch-app { position: relative; }
+    .check { width: 17px; height: 17px; display: grid; place-items: center; border-radius: 5px; border: 1px solid var(--purple-2); background: #332654; color: var(--purple); font-size: 11px; }
+    .batch-row { grid-template-columns: 18px 39px 1fr auto; }
+    .batch-bar { margin: 15px 25px 0; padding: 12px 14px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #775b32; border-radius: 13px; background: #241d18; color: #f0d3a0; font-size: 12px; font-weight: 800; }
+    .danger { padding: 9px 12px; border: 1px solid #844646; border-radius: 10px; background: #3a2025; color: #ffb0b0; font-size: 11px; font-weight: 900; }
+    .confirm { position: absolute; right: -22px; bottom: 34px; width: 330px; padding: 22px; border: 1px solid #4a4159; border-radius: 18px; background: #191620; box-shadow: 0 25px 70px rgba(0,0,0,.58); }
+    .confirm .warning { width: 38px; height: 38px; display: grid; place-items: center; border-radius: 12px; background: #3a2025; color: var(--red); font-weight: 900; }
+    .confirm h4 { margin: 14px 0 7px; font-size: 17px; }
+    .confirm p { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.45; }
+    .confirm-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 18px; }
+    .confirm-actions span { padding: 9px 12px; border-radius: 9px; font-size: 11px; font-weight: 900; }
+    .confirm-actions .cancel { border: 1px solid var(--line); color: var(--muted); }
+    .confirm-actions .yes { background: #b74f58; color: white; }
+
+    .trust-grid { width: 610px; display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .trust-card { min-height: 240px; padding: 25px; border: 1px solid #393243; border-radius: 23px; background: rgba(21,19,29,.94); box-shadow: 0 22px 60px rgba(0,0,0,.26); }
+    .trust-card.wide { grid-column: 1 / -1; min-height: 170px; display: flex; align-items: center; gap: 22px; }
+    .trust-icon { width: 48px; height: 48px; flex: 0 0 auto; display: grid; place-items: center; border-radius: 15px; background: var(--purple-soft); color: var(--purple); font-size: 22px; }
+    .trust-card h3 { margin: 18px 0 9px; font-size: 20px; }
+    .trust-card.wide h3 { margin-top: 0; }
+    .trust-card p { margin: 0; color: var(--muted); font-size: 14px; line-height: 1.5; }
+    .language-demo { display: flex; gap: 8px; margin-top: 26px; }
+    .language-demo span { padding: 9px 14px; border: 1px solid var(--line); border-radius: 11px; color: var(--muted); font-size: 13px; font-weight: 900; }
+    .language-demo .on { border-color: var(--purple-2); background: var(--purple-soft); color: var(--ink); }
+    .safe-list { display: grid; gap: 11px; margin-top: 20px; }
+    .safe-list span { display: flex; align-items: center; gap: 9px; color: #ddd6eb; font-size: 13px; }
+    .safe-list i { width: 18px; height: 18px; display: grid; place-items: center; border-radius: 50%; background: #183324; color: var(--green); font-style: normal; font-size: 11px; }
+  </style>
+</head>
+<body>
+  <section class="slide brand-slide" data-slide="1">
+    <div class="orb one"></div><div class="orb two"></div>
+    <div class="brand-wrap">
+      <div class="icon-halo"><img src="../../icons/icon128.png" alt="" /></div>
+      <h1>Manage Instagram Followers</h1>
+      <p>Understand your connections. Keep your following intentional.</p>
+      <div class="pill"><i></i> English & Portuguese · Privacy-first</div>
+    </div>
+  </section>
+
+  <section class="slide" data-slide="2">
+    <div class="orb one"></div><div class="orb two"></div>
+    <div class="copy"><div class="eyebrow">Clear answers</div><h1>Find who doesn’t follow you back.</h1><p>Compare followers and following in one click, then review the accounts that matter.</p><div class="proof"><span>Fast comparison</span><span>Relationship filters</span></div></div>
+    <div class="visual">
+      <div class="app">
+        <div class="app-header"><div class="brand"><img src="../../icons/icon128.png" alt=""><div><strong>Manage Instagram Followers</strong><small>Instagram</small></div></div><div class="lang"><span class="on">EN</span><span>PT</span></div></div>
+        <div class="home"><span class="mini-badge">Connection checkup</span><h2>See who doesn’t follow you back.</h2><p>Compare your connections, find non-followers, and clean up your following list.</p><button class="cta">Find non-followers <span>›</span></button><div class="steps"><div class="step"><em>1</em><b>Compare</b><small>Followers and following</small></div><div class="step"><em>2</em><b>Review</b><small>See the relationship status</small></div><div class="step"><em>3</em><b>Decide</b><small>Choose who to unfollow</small></div></div><div class="privacy-row"><span class="lock">▣</span>Your connection data stays in this browser.</div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide" data-slide="3">
+    <div class="orb one"></div><div class="orb two"></div>
+    <div class="copy"><div class="eyebrow">Everything in context</div><h1>Know every connection at a glance.</h1><p>Filter non-followers, mutuals, people you don’t follow back, and pending requests.</p><div class="proof"><span>Search & sort</span><span>Live counts</span><span>EN / PT</span></div></div>
+    <div class="visual">
+      <div class="app list-app"><div class="app-header"><div class="brand"><img src="../../icons/icon128.png" alt=""><div><strong>Manage Instagram Followers</strong><small>Instagram</small></div></div><div class="lang"><span class="on">EN</span><span>PT</span></div></div><div class="tabs"><div class="tab on">Following</div><div class="tab">Followers</div></div><div class="list-content"><div class="list-top"><div class="list-title"><span class="back">‹</span><div><h3>Following</h3><small>24 of 418 accounts</small></div></div><div class="filters"><span class="filter">All 418</span><span class="filter on">Not following you 24</span></div></div><div class="tools"><div class="tool">⌕ &nbsp; Username or name</div><div class="tool">Relationship</div><div class="tool">↻</div></div><div class="rows"><div class="row"><span class="avatar"></span><span class="identity"><b>@north.studio</b><span class="relation bad">Doesn’t follow you back</span></span><button class="action">Unfollow</button></div><div class="row"><span class="avatar a2"></span><span class="identity"><b>@marina.design</b><span class="relation good">You follow each other</span></span><button class="action">Unfollow</button></div><div class="row"><span class="avatar a3"></span><span class="identity"><b>@urban.frames</b><span class="relation bad">Doesn’t follow you back</span></span><button class="action">Unfollow</button></div><div class="row"><span class="avatar a4"></span><span class="identity"><b>@creative.daily</b><span class="relation">Follow request sent</span></span><button class="action">Cancel request</button></div></div></div></div>
+    </div>
+  </section>
+
+  <section class="slide" data-slide="4">
+    <div class="orb one"></div><div class="orb two"></div>
+    <div class="copy"><div class="eyebrow">You stay in control</div><h1>Review before you unfollow.</h1><p>Select non-followers, confirm the action, and process accounts one at a time with built-in safety limits.</p><div class="proof"><span>Confirmation first</span><span>Sequential actions</span><span>Stop anytime</span></div></div>
+    <div class="visual">
+      <div class="app list-app batch-app"><div class="app-header"><div class="brand"><img src="../../icons/icon128.png" alt=""><div><strong>Manage Instagram Followers</strong><small>Instagram</small></div></div><div class="lang"><span class="on">EN</span><span>PT</span></div></div><div class="tabs"><div class="tab on">Following</div><div class="tab">Followers</div></div><div class="batch-bar"><span>3 accounts selected</span><button class="danger">Unfollow selected</button></div><div class="list-content"><div class="rows"><div class="row batch-row"><span class="check">✓</span><span class="avatar"></span><span class="identity"><b>@north.studio</b><span class="relation bad">Doesn’t follow you back</span></span><button class="action">Unfollow</button></div><div class="row batch-row"><span class="check">✓</span><span class="avatar a3"></span><span class="identity"><b>@urban.frames</b><span class="relation bad">Doesn’t follow you back</span></span><button class="action">Unfollow</button></div><div class="row batch-row"><span class="check">✓</span><span class="avatar a4"></span><span class="identity"><b>@creative.daily</b><span class="relation bad">Doesn’t follow you back</span></span><button class="action">Unfollow</button></div></div></div><div class="confirm"><div class="warning">!</div><h4>Unfollow selected accounts?</h4><p>3 accounts will be processed one at a time using your current safety settings.</p><div class="confirm-actions"><span class="cancel">Cancel</span><span class="yes">Unfollow</span></div></div></div>
+    </div>
+  </section>
+
+  <section class="slide" data-slide="5">
+    <div class="orb one"></div><div class="orb two"></div>
+    <div class="copy"><div class="eyebrow">Private by design</div><h1>Your connections stay in your browser.</h1><p>No external server or database. Use the interface in English or Portuguese.</p><div class="proof"><span>No developer data collection</span><span>Local browser session</span></div></div>
+    <div class="visual"><div class="trust-grid"><div class="trust-card"><div class="trust-icon">A</div><h3>Your language, your choice</h3><p>Switch the complete interface whenever you need.</p><div class="language-demo"><span class="on">English</span><span>Português</span></div></div><div class="trust-card"><div class="trust-icon">✓</div><h3>Built-in safeguards</h3><p>Confirm actions and keep extension safety limits enabled.</p><div class="safe-list"><span><i>✓</i>Action confirmation</span><span><i>✓</i>Temporary limits</span></div></div><div class="trust-card wide"><div class="trust-icon">▣</div><div><h3>No external server</h3><p>Connection data is accessed through your existing Instagram browser session and is not sent to the developer.</p></div></div></div></div>
+  </section>
+  <script>
+    const slide = new URLSearchParams(location.search).get("slide") || "1";
+    document.querySelector(`[data-slide="${slide}"]`)?.classList.add("active");
+  </script>
+</body>
+</html>
