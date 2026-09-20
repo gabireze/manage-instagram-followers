@@ -24,37 +24,51 @@ $names = @(
   "05-privacy-languages.png"
 )
 
-for ($index = 0; $index -lt $names.Count; $index += 1) {
-  $outputPath = Join-Path $screenshotsDirectory $names[$index]
-  & $chromePath `
-    --headless=new `
-    --disable-gpu `
-    --hide-scrollbars `
-    --force-device-scale-factor=1 `
-    --window-size=1280,800 `
-    --screenshot=$outputPath `
-    "${sourceUrl}?slide=$($index + 1)" | Out-Null
+$variants = @(
+  @{ Language = "en"; Directory = $screenshotsDirectory },
+  @{ Language = "pt"; Directory = (Join-Path $screenshotsDirectory "pt-BR") }
+)
 
-  $sourceBitmap = [System.Drawing.Bitmap]::FromFile($outputPath)
-  try {
-    if ($sourceBitmap.Width -ne 1280 -or $sourceBitmap.Height -ne 800) {
-      throw "Unexpected screenshot dimensions for $($names[$index]): $($sourceBitmap.Width)x$($sourceBitmap.Height)"
-    }
-    $rgbBitmap = New-Object System.Drawing.Bitmap(1280, 800, ([System.Drawing.Imaging.PixelFormat]::Format24bppRgb))
-    $graphics = [System.Drawing.Graphics]::FromImage($rgbBitmap)
+foreach ($variant in $variants) {
+  New-Item -ItemType Directory -Force -Path $variant.Directory | Out-Null
+  for ($index = 0; $index -lt $names.Count; $index += 1) {
+    $outputPath = Join-Path $variant.Directory $names[$index]
+    & $chromePath `
+      --headless=new `
+      --disable-gpu `
+      --hide-scrollbars `
+      --force-device-scale-factor=1 `
+      --window-size=1280,800 `
+      --screenshot=$outputPath `
+      "${sourceUrl}?slide=$($index + 1)&lang=$($variant.Language)" | Out-Null
+
     try {
-      $graphics.Clear([System.Drawing.ColorTranslator]::FromHtml("#0d0b14"))
-      $graphics.DrawImageUnscaled($sourceBitmap, 0, 0)
-      $temporaryPath = "$outputPath.rgb.png"
-      $rgbBitmap.Save($temporaryPath, [System.Drawing.Imaging.ImageFormat]::Png)
+      $sourceBitmap = [System.Drawing.Bitmap]::FromFile($outputPath)
+      try {
+        if ($sourceBitmap.Width -ne 1280 -or $sourceBitmap.Height -ne 800) {
+          throw "Unexpected screenshot dimensions for $($names[$index]): $($sourceBitmap.Width)x$($sourceBitmap.Height)"
+        }
+        $rgbBitmap = New-Object System.Drawing.Bitmap(1280, 800, ([System.Drawing.Imaging.PixelFormat]::Format24bppRgb))
+        $graphics = [System.Drawing.Graphics]::FromImage($rgbBitmap)
+        try {
+          $graphics.Clear([System.Drawing.ColorTranslator]::FromHtml("#0d0b14"))
+          $graphics.DrawImageUnscaled($sourceBitmap, 0, 0)
+          $temporaryPath = "$outputPath.rgb.png"
+          $rgbBitmap.Save($temporaryPath, [System.Drawing.Imaging.ImageFormat]::Png)
+        } finally {
+          $graphics.Dispose()
+          $rgbBitmap.Dispose()
+        }
+      } finally {
+        $sourceBitmap.Dispose()
+      }
+      Move-Item -LiteralPath $temporaryPath -Destination $outputPath -Force
     } finally {
-      $graphics.Dispose()
-      $rgbBitmap.Dispose()
+      if (Test-Path -LiteralPath "$outputPath.rgb.png") {
+        Remove-Item -LiteralPath "$outputPath.rgb.png" -Force
+      }
     }
-  } finally {
-    $sourceBitmap.Dispose()
   }
-  Move-Item -LiteralPath $temporaryPath -Destination $outputPath -Force
 }
 
 Write-Output $outputDirectory

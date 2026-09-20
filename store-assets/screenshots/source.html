@@ -199,7 +199,90 @@
     <div class="visual"><div class="trust-grid"><div class="trust-card"><div class="trust-icon">A</div><h3>Your language, your choice</h3><p>Switch the complete interface whenever you need.</p><div class="language-demo"><span class="on">English</span><span>Português</span></div></div><div class="trust-card"><div class="trust-icon">✓</div><h3>Built-in safeguards</h3><p>Confirm actions and keep extension safety limits enabled.</p><div class="safe-list"><span><i>✓</i>Action confirmation</span><span><i>✓</i>Temporary limits</span></div></div><div class="trust-card wide"><div class="trust-icon">▣</div><div><h3>No external server</h3><p>Connection data is accessed through your existing Instagram browser session and is not sent to the developer.</p></div></div></div></div>
   </section>
   <script>
-    const slide = new URLSearchParams(location.search).get("slide") || "1";
+    const params = new URLSearchParams(location.search);
+    const language = params.get("lang") || "en";
+    const translations = {
+      "Understand your connections. Keep your following intentional.": "Entenda suas conexões. Siga apenas quem faz sentido.",
+      "English & Portuguese · Privacy-first": "Inglês e português · Privacidade em primeiro lugar",
+      "Clear answers": "Respostas claras",
+      "Find who doesn’t follow you back.": "Descubra quem não segue você de volta.",
+      "Compare followers and following in one click, then review the accounts that matter.": "Compare seguidores e perfis seguidos em um clique e revise as contas importantes.",
+      "Fast comparison": "Comparação rápida",
+      "Relationship filters": "Filtros por relação",
+      "Connection checkup": "Análise de conexões",
+      "See who doesn’t follow you back.": "Veja quem não segue você de volta.",
+      "Compare your connections, find non-followers, and clean up your following list.": "Compare suas conexões, encontre quem não segue você e organize a lista de perfis seguidos.",
+      "Find non-followers": "Encontrar quem não me segue",
+      "Compare": "Compare",
+      "Followers and following": "Seguidores e seguindo",
+      "Review": "Revise",
+      "See the relationship status": "Veja o status da relação",
+      "Decide": "Decida",
+      "Choose who to unfollow": "Escolha quem deixar de seguir",
+      "Your connection data stays in this browser.": "Seus dados de conexão permanecem neste navegador.",
+      "Everything in context": "Tudo em contexto",
+      "Know every connection at a glance.": "Entenda cada conexão rapidamente.",
+      "Filter non-followers, mutuals, people you don’t follow back, and pending requests.": "Filtre quem não segue você, conexões mútuas, quem você não segue e solicitações pendentes.",
+      "Search & sort": "Busque e ordene",
+      "Live counts": "Contadores atualizados",
+      "Following": "Seguindo",
+      "Followers": "Seguidores",
+      "24 of 418 accounts": "24 de 418 contas",
+      "All 418": "Todos 418",
+      "Not following you 24": "Não seguem você 24",
+      "Username or name": "Usuário ou nome",
+      "Relationship": "Relação",
+      "Doesn’t follow you back": "Não segue você de volta",
+      "You follow each other": "Vocês se seguem",
+      "Follow request sent": "Solicitação enviada",
+      "Unfollow": "Deixar de seguir",
+      "Cancel request": "Cancelar solicitação",
+      "You stay in control": "Você tem o controle",
+      "Review before you unfollow.": "Revise antes de deixar de seguir.",
+      "Select non-followers, confirm the action, and process accounts one at a time with built-in safety limits.": "Selecione quem não segue você, confirme a ação e processe uma conta por vez com limites de segurança.",
+      "Confirmation first": "Confirmação primeiro",
+      "Sequential actions": "Ações sequenciais",
+      "Stop anytime": "Pare quando quiser",
+      "3 accounts selected": "3 contas selecionadas",
+      "Unfollow selected": "Deixar de seguir selecionados",
+      "Unfollow selected accounts?": "Deixar de seguir as contas selecionadas?",
+      "3 accounts will be processed one at a time using your current safety settings.": "3 contas serão processadas uma por vez usando as configurações de segurança atuais.",
+      "Cancel": "Cancelar",
+      "Private by design": "Privacidade desde o início",
+      "Your connections stay in your browser.": "Suas conexões ficam no seu navegador.",
+      "No external server or database. Use the interface in English or Portuguese.": "Sem servidor externo ou banco de dados. Use a interface em português ou inglês.",
+      "No developer data collection": "Sem coleta de dados pelo desenvolvedor",
+      "Local browser session": "Sessão local do navegador",
+      "Your language, your choice": "Seu idioma, sua escolha",
+      "Switch the complete interface whenever you need.": "Alterne toda a interface quando quiser.",
+      "English": "Inglês",
+      "Built-in safeguards": "Proteções integradas",
+      "Confirm actions and keep extension safety limits enabled.": "Confirme ações e mantenha ativos os limites de segurança.",
+      "Action confirmation": "Confirmação de ações",
+      "Temporary limits": "Limites temporários",
+      "No external server": "Sem servidor externo",
+      "Connection data is accessed through your existing Instagram browser session and is not sent to the developer.": "Os dados de conexão são acessados pela sua sessão atual do Instagram e não são enviados ao desenvolvedor."
+    };
+
+    if (language === "pt") {
+      document.documentElement.lang = "pt-BR";
+      const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+      let node;
+      while ((node = walker.nextNode())) {
+        if (node.parentElement?.closest("script, style")) continue;
+        const text = node.nodeValue.trim();
+        if (translations[text]) node.nodeValue = node.nodeValue.replace(text, translations[text]);
+      }
+      document.querySelectorAll(".lang").forEach((selector) => {
+        selector.children[0]?.classList.remove("on");
+        selector.children[1]?.classList.add("on");
+      });
+      const languageDemo = document.querySelector(".language-demo");
+      languageDemo?.children[0]?.classList.remove("on");
+      languageDemo?.children[1]?.classList.add("on");
+    }
+
+    const slide = params.get("slide") || "1";
     document.querySelector(`[data-slide="${slide}"]`)?.classList.add("active");
   </script>
 </body>

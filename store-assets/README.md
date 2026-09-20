@@ -18,4 +18,6 @@ Upload the files in this order:
 
 Every screenshot is 1280 x 800 pixels, 24-bit RGB PNG, and has no alpha channel.
 
+Portuguese versions with the same names and layout are available in `screenshots/pt-BR/`. Keep the original files in `screenshots/` as the global English set, and use the `pt-BR` files for the Portuguese store locale.
+
 Run `powershell -ExecutionPolicy Bypass -File scripts/generate-store-assets.ps1` from the project root to regenerate the files from `screenshots/source.html`.
