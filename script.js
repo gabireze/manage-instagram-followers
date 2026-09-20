@@ -1,6 +1,13 @@
+(() => {
+window.__manageInstagramFollowersDispose?.();
+const lifecycle = new AbortController();
+window.__manageInstagramFollowersDispose = () => lifecycle.abort();
+const core = window.ManageInstagramFollowersCore;
+if (!core) throw new Error("Manage Instagram Followers core failed to load.");
+
 const translations = {
   en: {
-    appTitle: "Manage Followers",
+    appTitle: "Manage Instagram Followers",
     introTitle: "See who doesn’t follow you back.",
     introBody:
       "Compare your connections, find non-followers, and clean up your following list.",
@@ -11,13 +18,49 @@ const translations = {
     dismiss: "Dismiss message",
     searchLabel: "Search accounts",
     searchPlaceholder: "Username or name",
+    findNonFollowers: "Find non-followers",
+    allFilter: "All",
     nonFollowersFilter: "Not following you",
+    mutualFilter: "Mutual",
     notFollowedBackFilter: "You don’t follow",
-    removeFilter: "Show everyone",
+    requestedFilter: "Requested",
+    sortLabel: "Sort",
+    sortRelationship: "Relationship",
+    sortUsername: "Username",
+    sortName: "Name",
+    refresh: "Refresh",
+    updatedNow: "Updated just now",
+    updatedMinutes: "Updated {count} min ago",
+    loadingConnections: "Comparing your connections…",
+    loadingPage: "Comparing your connections… {count} loaded",
+    selectedCount: "{count} selected",
+    selectAccount: "Select @{username}",
+    selectShown: "Select shown",
+    clearSelection: "Clear",
+    stopBatch: "Stop",
+    unfollowSelected: "Unfollow selected",
+    batchProgress: "Unfollowing {current} of {total}…",
+    batchComplete: "Finished: {success} unfollowed, {failed} failed.",
+    batchStopped: "Stopped after {success} completed actions.",
+    batchLimitStopped:
+      "Paused at the safety limit after {success} actions. {remaining} remain selected.",
+    confirmTitle: "Confirm unfollow",
+    confirmBody: "Unfollow @{username}? This account {relationship}.",
+    confirmNonFollower: "doesn’t follow you back",
+    confirmMutual: "currently follows you",
+    confirmBatchTitle: "Unfollow selected accounts?",
+    confirmBatchBody:
+      "{count} accounts will be processed one at a time using your current safety settings.",
+    cancel: "Cancel",
+    confirmUnfollow: "Unfollow",
+    copyDiagnostics: "Copy diagnostic report",
+    diagnosticsCopied: "Diagnostic report copied. It contains no usernames, IDs, cookies, or tokens.",
     advancedTitle: "Advanced mode",
     advancedSummary: "Extension limits",
     advancedLabel: "Disable extension safety limits",
-    advancedHelp: "Instagram’s own limits still apply and cannot be bypassed.",
+    advancedHelp:
+      "Instagram’s own limits still apply. Advanced mode turns off after 15 minutes.",
+    advancedExpired: "Advanced mode was turned off automatically after 15 minutes.",
     footerNote:
       "Actions are verified with Instagram before the interface changes.",
     followingTitle: "Following",
@@ -35,8 +78,6 @@ const translations = {
       "Log in to Instagram, then reopen the extension to manage your connections.",
     loadError:
       "Instagram couldn’t load this list. Wait a moment and try again.",
-    filterError:
-      "Instagram couldn’t compare these lists. Wait a moment and try again.",
     mutual: "You follow each other",
     notFollowingYou: "Doesn’t follow you back",
     youDontFollow: "You don’t follow back",
@@ -63,7 +104,7 @@ const translations = {
     actionFailed: "Instagram couldn’t complete the {action} request.",
   },
   pt: {
-    appTitle: "Gerenciar seguidores",
+    appTitle: "Manage Instagram Followers",
     introTitle: "Veja quem não segue você de volta.",
     introBody:
       "Compare suas conexões, encontre quem não segue você e organize a lista de perfis seguidos.",
@@ -74,14 +115,49 @@ const translations = {
     dismiss: "Dispensar mensagem",
     searchLabel: "Buscar contas",
     searchPlaceholder: "Nome de usuário ou nome",
+    findNonFollowers: "Encontrar quem não me segue",
+    allFilter: "Todos",
     nonFollowersFilter: "Não seguem você",
+    mutualFilter: "Mútuos",
     notFollowedBackFilter: "Você não segue",
-    removeFilter: "Mostrar todos",
+    requestedFilter: "Solicitados",
+    sortLabel: "Ordenar",
+    sortRelationship: "Relação",
+    sortUsername: "Usuário",
+    sortName: "Nome",
+    refresh: "Atualizar",
+    updatedNow: "Atualizado agora",
+    updatedMinutes: "Atualizado há {count} min",
+    loadingConnections: "Comparando suas conexões…",
+    loadingPage: "Comparando suas conexões… {count} carregadas",
+    selectedCount: "{count} selecionados",
+    selectAccount: "Selecionar @{username}",
+    selectShown: "Selecionar exibidos",
+    clearSelection: "Limpar",
+    stopBatch: "Parar",
+    unfollowSelected: "Deixar de seguir selecionados",
+    batchProgress: "Processando {current} de {total}…",
+    batchComplete: "Concluído: {success} removidos, {failed} falharam.",
+    batchStopped: "Processamento interrompido após {success} ações concluídas.",
+    batchLimitStopped:
+      "Pausado no limite de segurança após {success} ações. {remaining} continuam selecionadas.",
+    confirmTitle: "Confirmar unfollow",
+    confirmBody: "Deixar de seguir @{username}? Esta conta {relationship}.",
+    confirmNonFollower: "não segue você de volta",
+    confirmMutual: "segue você atualmente",
+    confirmBatchTitle: "Deixar de seguir as contas selecionadas?",
+    confirmBatchBody:
+      "{count} contas serão processadas uma por vez com as configurações de segurança atuais.",
+    cancel: "Cancelar",
+    confirmUnfollow: "Deixar de seguir",
+    copyDiagnostics: "Copiar relatório de diagnóstico",
+    diagnosticsCopied: "Relatório copiado sem nomes, IDs, cookies ou tokens.",
     advancedTitle: "Modo avançado",
     advancedSummary: "Limites da extensão",
     advancedLabel: "Desativar limites de segurança da extensão",
     advancedHelp:
-      "Os limites do Instagram continuam valendo e não podem ser ignorados.",
+      "Os limites do Instagram continuam valendo. O modo avançado desliga após 15 minutos.",
+    advancedExpired: "O modo avançado foi desativado automaticamente após 15 minutos.",
     footerNote:
       "As ações são confirmadas com o Instagram antes de atualizar a interface.",
     followingTitle: "Seguindo",
@@ -99,8 +175,6 @@ const translations = {
       "Entre no Instagram e abra a extensão novamente para gerenciar suas conexões.",
     loadError:
       "O Instagram não conseguiu carregar esta lista. Aguarde um momento e tente novamente.",
-    filterError:
-      "O Instagram não conseguiu comparar as listas. Aguarde um momento e tente novamente.",
     mutual: "Vocês se seguem",
     notFollowingYou: "Não segue você de volta",
     youDontFollow: "Você não segue de volta",
@@ -128,7 +202,6 @@ const translations = {
   },
 };
 
-const localeStorageKey = "manageInstagramFollowers.locale";
 let currentLocale = "en";
 
 function t(key, values = {}) {
@@ -140,8 +213,6 @@ function t(key, values = {}) {
 }
 
 function getPreferredLocale() {
-  const savedLocale = localStorage.getItem(localeStorageKey);
-  if (savedLocale === "en" || savedLocale === "pt") return savedLocale;
   return navigator.language.toLowerCase().startsWith("pt") ? "pt" : "en";
 }
 
@@ -151,6 +222,7 @@ const advancedToggleGroup = document.getElementById("advancedToggleGroup");
 const searchGroup = document.getElementById("searchGroup");
 const titleAndFilter = document.getElementById("titleAndFilter");
 let advancedModeEnabled = false;
+let advancedModeTimer = null;
 const filterNotFollowingBackButton = document.getElementById(
   "filterNotFollowingBackButton"
 );
@@ -165,10 +237,29 @@ const userList = document.getElementById("userList");
 const resultsSummary = document.getElementById("resultsSummary");
 const notice = document.getElementById("notice");
 const noticeText = document.getElementById("noticeText");
+const filterAllButton = document.getElementById("filterAllButton");
+const filterMutualButton = document.getElementById("filterMutualButton");
+const filterRequestedButton = document.getElementById("filterRequestedButton");
+const searchInput = document.getElementById("searchInput");
+const sortSelect = document.getElementById("sortSelect");
+const updatedAt = document.getElementById("updatedAt");
+const batchBar = document.getElementById("batchBar");
+const selectionSummary = document.getElementById("selectionSummary");
+const confirmDialog = document.getElementById("confirmDialog");
+const confirmTitle = document.getElementById("confirmTitle");
+const confirmBody = document.getElementById("confirmBody");
+const acceptConfirmButton = document.getElementById("acceptConfirmButton");
+let confirmResolver = null;
+let confirmPreviousFocus = null;
 
 function setLocale(locale, persist = true) {
   currentLocale = locale === "pt" ? "pt" : "en";
-  if (persist) localStorage.setItem(localeStorageKey, currentLocale);
+  if (persist) {
+    window.postMessage(
+      { mifStorage: true, action: "setLocale", payload: currentLocale },
+      window.location.origin
+    );
+  }
 
   document
     .getElementById("manage-instagram-followers-root")
@@ -190,24 +281,13 @@ function setLocale(locale, persist = true) {
     );
   });
 
-  filterNotFollowingBackButton.textContent = t(
-    currentFilter === "notFollowingBack"
-      ? "removeFilter"
-      : "nonFollowersFilter"
-  );
-  filterNotFollowedBackButton.textContent = t(
-    currentFilter === "notFollowedBack"
-      ? "removeFilter"
-      : "notFollowedBackFilter"
-  );
-
   if (caller) {
-    const searchInput = document.getElementById("searchInput");
     if (searchInput.value.trim()) {
       searchInput.dispatchEvent(new Event("input", { bubbles: true }));
     } else {
-      addUsersToDom(currentFilteredUsers || [...loadedUsers.values()]);
+      renderCurrentUsers();
     }
+    updateUpdatedAt();
   }
 }
 
@@ -224,7 +304,10 @@ function dismissNotice() {
 }
 
 function closeExtension() {
+  batchCancelled = true;
   document.getElementById("manage-instagram-followers-root")?.remove();
+  clearTimeout(advancedModeTimer);
+  lifecycle.abort();
 }
 
 document.querySelectorAll(".language-button").forEach((button) => {
@@ -236,24 +319,35 @@ document
 document
   .getElementById("dismissNoticeButton")
   .addEventListener("click", dismissNotice);
-document.addEventListener("keydown", (event) => {
-  if (event.key === "Escape") closeExtension();
-});
+document.addEventListener(
+  "keydown",
+  (event) => {
+    if (event.key === "Escape") {
+      if (!confirmDialog.hidden) resolveConfirmation(false);
+      else closeExtension();
+    }
+  },
+  { signal: lifecycle.signal }
+);
 
 function resetUI() {
   loadedUsers.clear();
-  currentFilter = null;
-  currentFilteredUsers = null;
+  selectedUserIds.clear();
+  currentFilter = "all";
   document.getElementById("userList").innerHTML = "";
-  document.getElementById("searchInput").value = "";
-  filterNotFollowingBackButton.textContent = t("nonFollowersFilter");
-  filterNotFollowedBackButton.textContent = t("notFollowedBackFilter");
+  searchInput.value = "";
+  sortSelect.value = "relationship";
   title.textContent =
     caller === "Followers" ? t("followersTitle") : t("followingTitle");
   title.style.display = "flex";
   document
     .querySelectorAll(".filter")
-    .forEach((element) => element.classList.remove("filter-active"));
+    .forEach((element) => {
+      element.classList.remove("filter-active");
+      if (element.dataset.filter) element.setAttribute("aria-pressed", "false");
+    });
+  filterAllButton.classList.add("filter-active");
+  filterAllButton.setAttribute("aria-pressed", "true");
   infoText.style.display = "none";
   advancedToggleGroup.style.display = "flex";
   searchGroup.style.display = "grid";
@@ -263,52 +357,52 @@ function resetUI() {
   introBlock.hidden = true;
   introBlock.style.display = "none";
   dismissNotice();
+  updateBatchBar();
 }
 
-function toggleFilterButtons({
-  followingBackDisplay = "none",
-  followedBackDisplay = "flex",
-  followedBackTextKey = "",
-}) {
-  filterNotFollowingBackButton.style.display = followingBackDisplay;
-  filterNotFollowedBackButton.style.display = followedBackDisplay;
-  if (followedBackTextKey) {
-    filterNotFollowedBackButton.textContent = t(followedBackTextKey);
-  }
+function toggleFilterButtons(type) {
+  filterAllButton.style.display = "flex";
+  filterMutualButton.style.display = "flex";
+  filterNotFollowingBackButton.style.display =
+    type === "Following" ? "flex" : "none";
+  filterRequestedButton.style.display =
+    type === "Following" ? "flex" : "none";
+  filterNotFollowedBackButton.style.display =
+    type === "Followers" ? "flex" : "none";
 }
 
 document
   .getElementById("advancedModeToggle")
   .addEventListener("change", function (e) {
     advancedModeEnabled = e.target.checked;
-    console.log("Advanced Mode:", advancedModeEnabled);
+    clearTimeout(advancedModeTimer);
+    if (advancedModeEnabled) {
+      advancedModeTimer = setTimeout(() => {
+        advancedModeEnabled = false;
+        e.target.checked = false;
+        showNotice(t("advancedExpired"), "warning");
+      }, 15 * 60 * 1000);
+    }
   });
 
-loadFollowersButton.addEventListener("click", async () => {
+async function openList(type, initialFilter = "all") {
   if (!viewerId) {
     showNotice(t("loginRequired"));
     return;
   }
   resetUI();
-  setActiveListTab("Followers");
-  await fetchFollowers();
-  toggleFilterButtons({ followedBackTextKey: "notFollowedBackFilter" });
-});
+  currentFilter = initialFilter;
+  setActiveListTab(type);
+  toggleFilterButtons(type);
+  await fetchConnections(type);
+  setFilter(initialFilter);
+}
 
-loadFollowingButton.addEventListener("click", async () => {
-  if (!viewerId) {
-    showNotice(t("loginRequired"));
-    return;
-  }
-  resetUI();
-  setActiveListTab("Following");
-  await fetchFollowing();
-  toggleFilterButtons({
-    followingBackDisplay: "flex",
-    followedBackDisplay: "none",
-    followedBackTextKey: "nonFollowersFilter",
-  });
-});
+loadFollowersButton.addEventListener("click", () => openList("Followers"));
+loadFollowingButton.addEventListener("click", () => openList("Following"));
+document
+  .getElementById("findNonFollowersButton")
+  .addEventListener("click", () => openList("Following", "notFollowingBack"));
 
 function setActiveListTab(type) {
   loadFollowingButton.classList.toggle("is-active", type === "Following");
@@ -338,47 +432,50 @@ const connectionRequests = {
   Following: null,
   Followers: null,
 };
-let filteredUsers = [];
-let caller = null;
-let currentFilteredUsers = null;
-let currentFilter = null;
-let followUnfollowAttempts = {
-  follow: [],
-  unfollow: [],
+const connectionCacheUpdatedAt = {
+  Following: 0,
+  Followers: 0,
 };
+const connectionCacheTtl = 2 * 60 * 1000;
+let caller = null;
+let currentFilter = "all";
+let lastUpdatedAt = null;
+let searchTimer = null;
+let renderGeneration = 0;
+let visibleUserIds = [];
+const selectedUserIds = new Set();
+let batchCancelled = false;
+const diagnostics = { lastError: null, lastEndpoint: null, lastStatus: null };
+let followUnfollowAttempts = { follow: [], unfollow: [] };
 
-document.getElementById("searchInput").addEventListener("input", function (e) {
-  const searchTerm = e.target.value.trim().toLocaleLowerCase(currentLocale);
-  let usersToSearch = currentFilteredUsers || [...loadedUsers.values()];
-  if (!searchTerm) {
-    addUsersToDom(usersToSearch);
-    return;
-  }
-  filteredUsers = usersToSearch.filter(
-    (user) =>
-      user.username.toLocaleLowerCase(currentLocale).includes(searchTerm) ||
-      user.full_name.toLocaleLowerCase(currentLocale).includes(searchTerm)
+function persistRateLimitState() {
+  window.postMessage(
+    {
+      mifStorage: true,
+      action: "setRateLimits",
+      payload: followUnfollowAttempts,
+    },
+    window.location.origin
   );
-  addUsersToDom(filteredUsers, filteredUsers.length === 0 ? "search" : null);
+}
+
+searchInput.addEventListener("input", () => {
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(renderCurrentUsers, 150);
 });
+sortSelect.addEventListener("change", renderCurrentUsers);
 
 function normalizeConnectionUser(user, type) {
-  const friendship = user.friendship_status || {};
-
-  return {
-    ...user,
-    id: String(user.id || user.pk),
-    followed_by_viewer:
-      user.followed_by_viewer ?? friendship.following ?? type === "Following",
-    follows_viewer:
-      user.follows_viewer ?? friendship.followed_by ?? type === "Followers",
-    requested_by_viewer:
-      user.requested_by_viewer ?? friendship.outgoing_request ?? false,
-  };
+  return core.normalizeConnectionUser(user, type);
 }
 
 function setLoading(isLoading) {
   const loader = document.getElementById("loader");
+  if (isLoading) {
+    document.getElementById("loadingProgress").textContent = t(
+      "loadingConnections"
+    );
+  }
   loader.style.display = isLoading ? "flex" : "none";
   userList.style.display = isLoading ? "none" : caller ? "flex" : "none";
   document
@@ -394,7 +491,7 @@ function updateResultsMeta(users) {
   const total = loadedUsers.size;
   const count = users.length;
   resultsSummary.textContent =
-    currentFilter || count !== total
+    currentFilter !== "all" || count !== total
       ? t("filteredCount", { count, total })
       : t(count === 1 ? "resultCount" : "resultCountPlural", { count });
 }
@@ -442,6 +539,9 @@ async function requestConnections(type) {
       }
     );
 
+    diagnostics.lastEndpoint = `${type.toLowerCase()} list`;
+    diagnostics.lastStatus = response.status;
+
     if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);
 
     const data = await response.json();
@@ -455,6 +555,10 @@ async function requestConnections(type) {
       );
     }
 
+    document.getElementById("loadingProgress").textContent = t("loadingPage", {
+      count: users.length,
+    });
+
     nextMaxId = data.next_max_id || null;
   } while (nextMaxId);
 
@@ -462,26 +566,25 @@ async function requestConnections(type) {
 }
 
 function refreshRelationshipFlags() {
-  ["Following", "Followers"].forEach((type) => {
-    connectionCache[type]?.forEach((user) => {
-      if (connectionCache.Following) {
-        user.followed_by_viewer = connectionCache.Following.has(user.id);
-      }
-      if (connectionCache.Followers) {
-        user.follows_viewer = connectionCache.Followers.has(user.id);
-      }
-    });
-  });
+  core.reconcileConnectionMaps(
+    connectionCache.Following,
+    connectionCache.Followers
+  );
 }
 
 async function ensureConnections(type) {
-  if (connectionCache[type]) return connectionCache[type];
+  const cacheIsFresh =
+    connectionCache[type] &&
+    Date.now() - connectionCacheUpdatedAt[type] < connectionCacheTtl;
+  if (cacheIsFresh) return connectionCache[type];
+  connectionCache[type] = null;
 
   if (!connectionRequests[type]) {
     connectionRequests[type] = requestConnections(type)
       .then((users) => {
         const connections = new Map(users.map((user) => [user.id, user]));
         connectionCache[type] = connections;
+        connectionCacheUpdatedAt[type] = Date.now();
         return connections;
       })
       .finally(() => {
@@ -509,9 +612,11 @@ async function fetchConnections(type) {
     refreshRelationshipFlags();
     const users = [...selectedConnections.values()];
     loadedUsers.clear();
-
     updateUIWithData(users, type);
+    lastUpdatedAt = Date.now();
+    updateUpdatedAt();
   } catch (error) {
+    diagnostics.lastError = error?.message || String(error);
     console.error("Error when fetching data from Instagram:", error);
     showNotice(t("loadError"));
     renderEmptyState();
@@ -520,35 +625,11 @@ async function fetchConnections(type) {
   }
 }
 
-const fetchFollowing = () => fetchConnections("Following");
-const fetchFollowers = () => fetchConnections("Followers");
-
 function updateUIWithData(edges, functionCalled) {
-  document.getElementById("searchInput").style.display = "block";
-
+  searchInput.style.display = "block";
   populateLoadedUser(edges, functionCalled);
-  if (currentFilter === "notFollowingBack" && functionCalled === "Following") {
-    currentFilteredUsers = [...loadedUsers.values()].filter(
-      (user) => !user.follows_viewer && user.followed_by_viewer
-    );
-    addUsersToDom(
-      currentFilteredUsers,
-      currentFilteredUsers.length === 0 ? "filter" : null
-    );
-  } else if (
-    currentFilter === "notFollowedBack" &&
-    functionCalled === "Followers"
-  ) {
-    currentFilteredUsers = [...loadedUsers.values()].filter(
-      (user) => !user.followed_by_viewer
-    );
-    addUsersToDom(
-      currentFilteredUsers,
-      currentFilteredUsers.length === 0 ? "filter" : null
-    );
-  } else {
-    addUsersToDom([...loadedUsers.values()]);
-  }
+  updateFilterCounts();
+  renderCurrentUsers();
 }
 
 function populateLoadedUser(users, functionCalled) {
@@ -564,51 +645,71 @@ function populateLoadedUser(users, functionCalled) {
 }
 
 function getRelationshipState(user) {
-  if (user.requested_by_viewer) {
-    return {
-      infoKey: "requestSent",
-      labelKey: "cancelRequest",
-      action: "unfollow",
-      tone: "pending",
-    };
-  }
+  return core.getRelationshipState(user);
+}
 
-  if (user.followed_by_viewer && user.follows_viewer) {
-    return {
-      infoKey: "mutual",
-      labelKey: "unfollow",
-      action: "unfollow",
-      tone: "mutual",
-    };
+function updateFilterCounts() {
+  const counts = core.countRelationships([...loadedUsers.values()]);
+  document.querySelectorAll("[data-count]").forEach((element) => {
+    element.textContent = String(counts[element.dataset.count] || 0);
+  });
+  if (caller === "Following") {
+    filterRequestedButton.style.display = counts.requested ? "flex" : "none";
   }
+}
 
-  if (user.followed_by_viewer && !user.follows_viewer) {
-    return {
-      infoKey: "notFollowingYou",
-      labelKey: "unfollow",
-      action: "unfollow",
-      tone: "nonFollower",
-    };
+function setFilter(filter) {
+  currentFilter = filter || "all";
+  document.querySelectorAll(".filter[data-filter]").forEach((button) => {
+    const isActive = button.dataset.filter === currentFilter;
+    button.classList.toggle("filter-active", isActive);
+    button.setAttribute("aria-pressed", String(isActive));
+  });
+  renderCurrentUsers();
+}
+
+function renderCurrentUsers() {
+  let users = core.filterUsers([...loadedUsers.values()], currentFilter);
+  const searchTerm = searchInput.value.trim().toLocaleLowerCase(currentLocale);
+  if (searchTerm) {
+    users = users.filter(
+      (user) =>
+        user.username.toLocaleLowerCase(currentLocale).includes(searchTerm) ||
+        (user.full_name || "")
+          .toLocaleLowerCase(currentLocale)
+          .includes(searchTerm)
+    );
   }
+  const filteredUsers = core.sortUsers(users, sortSelect.value, currentLocale);
+  visibleUserIds = filteredUsers.map((user) => user.id);
+  document.getElementById("selectVisibleButton").style.display =
+    caller === "Following" && currentFilter === "notFollowingBack"
+      ? "flex"
+      : "none";
+  addUsersToDom(
+    filteredUsers,
+    filteredUsers.length === 0
+      ? searchTerm
+        ? "search"
+        : currentFilter !== "all"
+        ? "filter"
+        : "empty"
+      : null
+  );
+}
 
-  if (!user.followed_by_viewer && user.follows_viewer) {
-    return {
-      infoKey: "youDontFollow",
-      labelKey: "followBack",
-      action: "follow",
-      tone: "notFollowedBack",
-    };
+function updateUpdatedAt() {
+  if (!lastUpdatedAt) {
+    updatedAt.textContent = "";
+    return;
   }
-
-  return {
-    infoKey: "neither",
-    labelKey: "follow",
-    action: "follow",
-    tone: "none",
-  };
+  const minutes = Math.floor((Date.now() - lastUpdatedAt) / 60000);
+  updatedAt.textContent =
+    minutes < 1 ? t("updatedNow") : t("updatedMinutes", { count: minutes });
 }
 
 function addUsersToDom(users, emptyReason = null) {
+  const generation = ++renderGeneration;
   userList.innerHTML = "";
   userList.style.display = "flex";
   title.textContent =
@@ -620,7 +721,10 @@ function addUsersToDom(users, emptyReason = null) {
     return;
   }
 
-  users.forEach((user) => {
+  const renderChunk = (startIndex) => {
+    if (generation !== renderGeneration) return;
+    const fragment = document.createDocumentFragment();
+    users.slice(startIndex, startIndex + 80).forEach((user) => {
     const relationState = getRelationshipState(user);
     const profileUrl = `https://www.instagram.com/${encodeURIComponent(
       user.username
@@ -628,6 +732,15 @@ function addUsersToDom(users, emptyReason = null) {
     const userDiv = document.createElement("article");
     userDiv.className = "user";
     userDiv.dataset.id = user.id;
+
+    const select = document.createElement("input");
+    select.type = "checkbox";
+    select.className = "user-select";
+    select.dataset.id = user.id;
+    select.checked = selectedUserIds.has(user.id);
+    select.setAttribute("aria-label", t("selectAccount", { username: user.username }));
+    select.hidden =
+      caller !== "Following" || relationState.tone !== "nonFollower";
 
     const photoLink = document.createElement("a");
     photoLink.className = "user-photo-link";
@@ -673,19 +786,28 @@ function addUsersToDom(users, emptyReason = null) {
     actionButton.dataset.action = relationState.action;
     actionButton.textContent = t(relationState.labelKey);
 
-    userDiv.append(photoLink, details, actionButton);
-    userList.appendChild(userDiv);
-  });
-
-  attachButtonListeners();
+    userDiv.append(select, photoLink, details, actionButton);
+      fragment.appendChild(userDiv);
+    });
+    userList.appendChild(fragment);
+    if (startIndex + 80 < users.length) {
+      requestAnimationFrame(() => renderChunk(startIndex + 80));
+    }
+  };
+  renderChunk(0);
 }
 
-function attachButtonListeners() {
-  document.querySelectorAll(".action-button").forEach((button) => {
-    button.removeEventListener("click", handleActionButtonClick);
-    button.addEventListener("click", handleActionButtonClick);
-  });
-}
+userList.addEventListener("click", (event) => {
+  const button = event.target.closest(".action-button");
+  if (button) handleActionButtonClick({ target: button });
+});
+userList.addEventListener("change", (event) => {
+  const checkbox = event.target.closest(".user-select");
+  if (!checkbox) return;
+  if (checkbox.checked) selectedUserIds.add(checkbox.dataset.id);
+  else selectedUserIds.delete(checkbox.dataset.id);
+  updateBatchBar();
+});
 
 const viewerIdMatch = document.body.innerHTML.match(/"viewerId":"(\w+)"/i);
 const appScopedIdentityMatch = document.body.innerHTML.match(
@@ -760,22 +882,63 @@ function isWithinLimit(actionType) {
   }
 
   followUnfollowAttempts[actionType].push(now);
+  persistRateLimitState();
   return true;
 }
 
 const handleActionButtonClick = async (event) => {
   const userId = event.target.getAttribute("data-id");
   const action = event.target.getAttribute("data-action");
-  if (!isWithinLimit(action)) return;
 
   if (action === "follow") {
+    if (!isWithinLimit(action)) return;
     await followUser(userId, event.target);
   } else if (action === "unfollow") {
+    const user = loadedUsers.get(userId);
+    const confirmed = await requestConfirmation(
+      t("confirmTitle"),
+      t("confirmBody", {
+        username: user?.username || "",
+        relationship: t(
+          user?.follows_viewer ? "confirmMutual" : "confirmNonFollower"
+        ),
+      })
+    );
+    if (!confirmed || !isWithinLimit(action)) return;
     await unfollowUser(userId, event.target);
   }
 };
 
-function updateRelationshipInfo(userId, newStatus) {
+function requestConfirmation(titleText, bodyText) {
+  if (confirmResolver) confirmResolver(false);
+  confirmPreviousFocus = document.activeElement;
+  confirmTitle.textContent = titleText;
+  confirmBody.textContent = bodyText;
+  confirmDialog.hidden = false;
+  acceptConfirmButton.focus({ preventScroll: true });
+  return new Promise((resolve) => {
+    confirmResolver = resolve;
+  });
+}
+
+function resolveConfirmation(value) {
+  confirmDialog.hidden = true;
+  const resolver = confirmResolver;
+  confirmResolver = null;
+  resolver?.(value);
+  confirmPreviousFocus?.focus?.({ preventScroll: true });
+  confirmPreviousFocus = null;
+}
+
+document
+  .getElementById("cancelConfirmButton")
+  .addEventListener("click", () => resolveConfirmation(false));
+acceptConfirmButton.addEventListener("click", () => resolveConfirmation(true));
+confirmDialog.addEventListener("click", (event) => {
+  if (event.target === confirmDialog) resolveConfirmation(false);
+});
+
+function updateRelationshipInfo(userId) {
   const userDiv = document.querySelector(`.user[data-id="${userId}"]`);
   if (!userDiv) return;
 
@@ -818,17 +981,8 @@ function getInstagramErrorMessage(action, response, data) {
   return t("instagramRejected", { action: actionLabel, reason });
 }
 
-function responseMatchesFriendshipAction(data, action) {
-  const relationship = data?.friendship_status || data;
-  const following = relationship?.following;
-  const outgoingRequest = relationship?.outgoing_request;
-
-  if (action === "follow") {
-    return following === true || outgoingRequest === true;
-  }
-
-  return following === false && outgoingRequest !== true;
-}
+const responseMatchesFriendshipAction =
+  core.responseMatchesFriendshipAction;
 
 function getInstagramModule(moduleName) {
   try {
@@ -892,6 +1046,9 @@ async function verifyFriendshipAction(userId, action) {
       }
     );
 
+    diagnostics.lastEndpoint = "friendship verification";
+    diagnostics.lastStatus = response.status;
+
     if (!response.ok) continue;
 
     const data = await response.json();
@@ -951,12 +1108,18 @@ async function performFriendshipAction(userId, action) {
   let lastError = null;
 
   for (const request of requests) {
+    diagnostics.lastEndpoint = request.endpoint.includes("unfollow")
+      ? "unfollow action"
+      : request.endpoint.includes("destroy")
+      ? "unfollow fallback"
+      : "follow action";
     const response = await fetch(request.endpoint, {
       method: "POST",
       headers,
       credentials: "include",
       body: request.body,
     });
+    diagnostics.lastStatus = response.status;
 
     let data = null;
     try {
@@ -1016,12 +1179,18 @@ const followUser = async (userId, button) => {
     user.followed_by_viewer = true;
     user.requested_by_viewer = false;
     connectionCache.Following?.set(userId, user);
+    connectionCacheUpdatedAt.Following = Date.now();
     updateRelationshipInfo(userId, "follow");
+    updateFilterCounts();
+    renderCurrentUsers();
+    return true;
   } catch (error) {
+    diagnostics.lastError = error?.message || String(error);
     const user = loadedUsers.get(userId);
     if (user) button.textContent = t(getRelationshipState(user).labelKey);
     showNotice(error.message || t("actionFailed", { action: t("actionFollow") }));
     console.error("Error in the follow request:", error);
+    return false;
   } finally {
     delete button.dataset.state;
     button.disabled = false;
@@ -1046,85 +1215,185 @@ const unfollowUser = async (userId, button) => {
     user.followed_by_viewer = false;
     user.requested_by_viewer = false;
     connectionCache.Following?.delete(userId);
+    connectionCacheUpdatedAt.Following = Date.now();
+    if (caller === "Following") loadedUsers.delete(userId);
     updateRelationshipInfo(userId, "unfollow");
+    selectedUserIds.delete(userId);
+    updateFilterCounts();
+    renderCurrentUsers();
+    updateBatchBar();
+    return true;
   } catch (error) {
+    diagnostics.lastError = error?.message || String(error);
     const user = loadedUsers.get(userId);
     if (user) button.textContent = t(getRelationshipState(user).labelKey);
     showNotice(
       error.message || t("actionFailed", { action: t("actionUnfollow") })
     );
     console.error("Error in the unfollow request:", error);
+    return false;
   } finally {
     delete button.dataset.state;
     button.disabled = false;
   }
 };
 
-document
-  .getElementById("filterNotFollowingBackButton")
-  .addEventListener("click", async function () {
-    const button = this;
-    if (currentFilter === "notFollowingBack") {
-      currentFilter = null;
-      button.textContent = t("nonFollowersFilter");
-      button.classList.remove("filter-active");
-      currentFilteredUsers = null;
-      updateUIWithData([...loadedUsers.values()], caller);
-    } else {
-      setLoading(true);
-      try {
-        const followers = await ensureConnections("Followers");
-        currentFilter = "notFollowingBack";
-        currentFilteredUsers = [...loadedUsers.values()].filter(
-          (user) => !followers.has(user.id)
-        );
-        button.textContent = t("removeFilter");
-        button.classList.add("filter-active");
-        addUsersToDom(
-          currentFilteredUsers,
-          currentFilteredUsers.length === 0 ? "filter" : null
-        );
-      } catch (error) {
-        console.error("Error when loading followers for the filter:", error);
-        showNotice(t("filterError"));
-      } finally {
-        setLoading(false);
-      }
+document.querySelectorAll(".filter[data-filter]").forEach((button) => {
+  button.addEventListener("click", () => setFilter(button.dataset.filter));
+});
+
+document.getElementById("refreshButton").addEventListener("click", async () => {
+  if (!caller) return;
+  connectionCache.Following = null;
+  connectionCache.Followers = null;
+  connectionCacheUpdatedAt.Following = 0;
+  connectionCacheUpdatedAt.Followers = 0;
+  selectedUserIds.clear();
+  updateBatchBar();
+  await fetchConnections(caller);
+});
+
+function updateBatchBar() {
+  const count = selectedUserIds.size;
+  batchBar.hidden = count === 0;
+  selectionSummary.textContent = t("selectedCount", { count });
+}
+
+document.getElementById("clearSelectionButton").addEventListener("click", () => {
+  selectedUserIds.clear();
+  document
+    .querySelectorAll(".user-select")
+    .forEach((checkbox) => (checkbox.checked = false));
+  updateBatchBar();
+});
+
+document.getElementById("selectVisibleButton").addEventListener("click", () => {
+  visibleUserIds.forEach((id) => {
+    const user = loadedUsers.get(id);
+    if (user && getRelationshipState(user).tone === "nonFollower") {
+      selectedUserIds.add(id);
     }
   });
+  renderCurrentUsers();
+  updateBatchBar();
+});
 
 document
-  .getElementById("filterNotFollowedBackButton")
-  .addEventListener("click", async function () {
-    const button = this;
-    if (currentFilter === "notFollowedBack") {
-      currentFilter = null;
-      button.textContent = t("notFollowedBackFilter");
-      button.classList.remove("filter-active");
-      currentFilteredUsers = null;
-      updateUIWithData([...loadedUsers.values()], caller);
-    } else {
-      setLoading(true);
-      try {
-        const following = await ensureConnections("Following");
-        currentFilter = "notFollowedBack";
-        currentFilteredUsers = [...loadedUsers.values()].filter(
-          (user) => !following.has(user.id)
-        );
-        button.textContent = t("removeFilter");
-        button.classList.add("filter-active");
-        addUsersToDom(
-          currentFilteredUsers,
-          currentFilteredUsers.length === 0 ? "filter" : null
-        );
-      } catch (error) {
-        console.error("Error when loading following for the filter:", error);
-        showNotice(t("filterError"));
-      } finally {
-        setLoading(false);
+  .getElementById("unfollowSelectedButton")
+  .addEventListener("click", async () => {
+    const ids = [...selectedUserIds].filter((id) =>
+      loadedUsers.get(id)?.followed_by_viewer
+    );
+    if (!ids.length) return;
+    const confirmed = await requestConfirmation(
+      t("confirmBatchTitle"),
+      t("confirmBatchBody", { count: ids.length })
+    );
+    if (!confirmed) return;
+
+    batchCancelled = false;
+    const stopButton = document.getElementById("stopBatchButton");
+    const batchButton = document.getElementById("unfollowSelectedButton");
+    stopButton.hidden = false;
+    batchButton.disabled = true;
+    let success = 0;
+    let failed = 0;
+    let stoppedByLimit = false;
+    for (let index = 0; index < ids.length; index += 1) {
+      if (batchCancelled) break;
+      if (!isWithinLimit("unfollow")) {
+        stoppedByLimit = true;
+        break;
+      }
+      showNotice(
+        t("batchProgress", { current: index + 1, total: ids.length }),
+        "warning"
+      );
+      const button = document.querySelector(
+        `.action-button[data-id="${ids[index]}"]`
+      );
+      if (!button) {
+        failed += 1;
+        continue;
+      }
+      if (await unfollowUser(ids[index], button)) success += 1;
+      else failed += 1;
+      if (index < ids.length - 1) {
+        await new Promise((resolve) => setTimeout(resolve, 1500));
       }
     }
+    stopButton.hidden = true;
+    batchButton.disabled = false;
+    showNotice(
+      stoppedByLimit
+        ? t("batchLimitStopped", {
+            success,
+            remaining: selectedUserIds.size,
+          })
+        : batchCancelled
+        ? t("batchStopped", { success })
+        : t("batchComplete", { success, failed }),
+      failed || batchCancelled || stoppedByLimit ? "warning" : "success"
+    );
+  });
+
+document.getElementById("stopBatchButton").addEventListener("click", () => {
+  batchCancelled = true;
+});
+
+const storageRequestId = crypto.randomUUID();
+window.addEventListener(
+  "message",
+  (event) => {
+    if (
+      event.source !== window ||
+      !event.data?.mifStorage ||
+      event.data.action !== "state" ||
+      event.data.requestId !== storageRequestId
+    ) {
+      return;
+    }
+    const storedLocale = event.data.payload?.locale;
+    if (storedLocale === "en" || storedLocale === "pt") {
+      setLocale(storedLocale, false);
+    }
+    const storedLimits = event.data.payload?.rateLimits;
+    followUnfollowAttempts = {
+      follow: Array.isArray(storedLimits?.follow) ? storedLimits.follow : [],
+      unfollow: Array.isArray(storedLimits?.unfollow)
+        ? storedLimits.unfollow
+        : [],
+    };
+  },
+  { signal: lifecycle.signal }
+);
+window.postMessage(
+  { mifStorage: true, action: "get", requestId: storageRequestId },
+  window.location.origin
+);
+
+document
+  .getElementById("copyDiagnosticsButton")
+  .addEventListener("click", async () => {
+    const counts = core.countRelationships([...loadedUsers.values()]);
+    const report = {
+      extension: "Manage Instagram Followers",
+      version: "1.2.0",
+      locale: currentLocale,
+      view: caller || "home",
+      filter: currentFilter,
+      counts,
+      lastEndpoint: diagnostics.lastEndpoint,
+      lastStatus: diagnostics.lastStatus,
+      lastFailure: Boolean(diagnostics.lastError),
+      generatedAt: new Date().toISOString(),
+    };
+    await navigator.clipboard.writeText(JSON.stringify(report, null, 2));
+    showNotice(t("diagnosticsCopied"), "success");
   });
 
 setLocale(getPreferredLocale(), false);
-loadFollowingButton.focus({ preventScroll: true });
+document
+  .getElementById("findNonFollowersButton")
+  .focus({ preventScroll: true });
+})();

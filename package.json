@@ -1,0 +1,11 @@
+{
+  "name": "manage-instagram-followers",
+  "version": "1.2.0",
+  "private": true,
+  "scripts": {
+    "check": "node --check background.js && node --check html.js && node --check core.js && node --check script.js",
+    "icons": "powershell -ExecutionPolicy Bypass -File scripts/generate-icons.ps1",
+    "package": "powershell -ExecutionPolicy Bypass -File scripts/package-extension.ps1",
+    "test": "node --test"
+  }
+}

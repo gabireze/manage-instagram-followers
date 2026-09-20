@@ -6,7 +6,7 @@
 
 ## 1. Data Collection
 
-This extension **does not collect**, store, or transmit any personally identifiable information (PII) or Instagram credentials.
+This extension **does not collect or transmit to the developer** any personally identifiable information (PII), Instagram credentials, cookies, authentication tokens, usernames, or account IDs.
 
 The only data accessed is:
 
@@ -17,11 +17,18 @@ The only data accessed is:
 
 ## 2. Data Storage
 
-The extension does **not use any external server** or database. All data is:
+The extension does **not use any external server** or database. Instagram connection data is:
 
 - Accessed **locally within your browser session**.
 - Not stored permanently.
 - Not transmitted to any third party.
+
+The extension stores only the following preferences in Chrome's extension storage:
+
+- The selected interface language.
+- Recent follow/unfollow timestamps used to enforce the extension's safety limits during the browser session.
+
+These records do not contain Instagram usernames, account IDs, cookies, credentials, or profile data.
 
 ---
 
@@ -30,6 +37,7 @@ The extension does **not use any external server** or database. All data is:
 The extension requires the following Chrome permissions:
 
 - `scripting` – to inject the interface into Instagram's website.
+- `storage` – to save the language preference and temporary safety-limit timestamps.
 
 These permissions are only used to enable functionality and **not for data tracking**.
 
@@ -43,7 +51,7 @@ We do **not share**, sell, or expose your data to any third parties. This extens
 
 ## 5. Responsibility
 
-While this extension does not violate Instagram’s public interface, you are responsible for using it in accordance with Instagram’s [Terms of Use](https://help.instagram.com/581066165581870) and applicable rate limits.
+Manage Instagram Followers is an independent project and is not affiliated with, endorsed by, or sponsored by Instagram or Meta. The extension depends on authenticated Instagram web requests that may change without notice. You are responsible for using it in accordance with Instagram’s [Terms of Use](https://help.instagram.com/581066165581870) and applicable rate limits.
 
 ---
 

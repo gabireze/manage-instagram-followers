@@ -17,7 +17,7 @@ const init = () => {
               </svg>
             </span>
             <div>
-              <h1 id="appTitle" data-i18n="appTitle">Manage Followers</h1>
+              <h1 id="appTitle" data-i18n="appTitle">Manage Instagram Followers</h1>
               <p class="app-kicker">Instagram</p>
             </div>
           </div>
@@ -38,6 +38,12 @@ const init = () => {
         <div class="intro-block">
           <h2 data-i18n="introTitle">See who doesn’t follow you back.</h2>
           <p id="info-text" data-i18n="introBody">Compare your connections, find non-followers, and clean up your following list.</p>
+          <button type="button" id="findNonFollowersButton" class="primary-cta data-action-control">
+            <span data-i18n="findNonFollowers">Find non-followers</span>
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" aria-hidden="true">
+              <path d="m9 6 6 6-6 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+          </button>
         </div>
 
         <nav class="list-tabs" aria-label="Connection lists" data-i18n-aria-label="listsLabel">
@@ -71,25 +77,53 @@ const init = () => {
               <p id="resultsSummary" class="results-summary" aria-live="polite"></p>
             </div>
             <div class="filter-buttons">
-              <button type="button" id="filterNotFollowingBackButton" class="filter data-action-control"><span data-i18n="nonFollowersFilter">Not following you</span></button>
-              <button type="button" id="filterNotFollowedBackButton" class="filter data-action-control"><span data-i18n="notFollowedBackFilter">You don’t follow</span></button>
+              <button type="button" id="filterAllButton" class="filter data-action-control filter-active" data-filter="all"><span data-i18n="allFilter">All</span><span class="filter-count" data-count="all"></span></button>
+              <button type="button" id="filterNotFollowingBackButton" class="filter data-action-control" data-filter="notFollowingBack"><span data-i18n="nonFollowersFilter">Not following you</span><span class="filter-count" data-count="notFollowingBack"></span></button>
+              <button type="button" id="filterMutualButton" class="filter data-action-control" data-filter="mutual"><span data-i18n="mutualFilter">Mutual</span><span class="filter-count" data-count="mutual"></span></button>
+              <button type="button" id="filterNotFollowedBackButton" class="filter data-action-control" data-filter="notFollowedBack"><span data-i18n="notFollowedBackFilter">You don’t follow</span><span class="filter-count" data-count="notFollowedBack"></span></button>
+              <button type="button" id="filterRequestedButton" class="filter data-action-control" data-filter="requested"><span data-i18n="requestedFilter">Requested</span><span class="filter-count" data-count="requested"></span></button>
+              <button type="button" id="selectVisibleButton" class="filter" data-i18n="selectShown">Select shown</button>
             </div>
           </div>
 
           <div class="input-group" id="searchGroup">
-            <label for="searchInput" data-i18n="searchLabel">Search accounts</label>
-            <div class="search-field">
-              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" aria-hidden="true">
-                <circle cx="11" cy="11" r="6.5" stroke="currentColor" stroke-width="1.8" />
-                <path d="m16 16 4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
-              </svg>
-              <input type="search" id="searchInput" data-i18n-placeholder="searchPlaceholder" placeholder="Username or name" autocomplete="off" />
+            <div class="search-control">
+              <label for="searchInput" data-i18n="searchLabel">Search accounts</label>
+              <div class="search-field">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" aria-hidden="true">
+                  <circle cx="11" cy="11" r="6.5" stroke="currentColor" stroke-width="1.8" />
+                  <path d="m16 16 4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+                </svg>
+                <input type="search" id="searchInput" data-i18n-placeholder="searchPlaceholder" placeholder="Username or name" autocomplete="off" />
+              </div>
+            </div>
+            <div class="sort-control">
+              <label for="sortSelect" data-i18n="sortLabel">Sort</label>
+              <select id="sortSelect" class="sort-select data-action-control">
+                <option value="relationship" data-i18n="sortRelationship">Relationship</option>
+                <option value="username" data-i18n="sortUsername">Username</option>
+                <option value="name" data-i18n="sortName">Name</option>
+              </select>
+            </div>
+            <button type="button" id="refreshButton" class="refresh-button data-action-control" data-i18n-aria-label="refresh" aria-label="Refresh">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" aria-hidden="true"><path d="M20 6v5h-5M4 18v-5h5M18.5 9A7 7 0 0 0 6 6.5L4 9m2 6a7 7 0 0 0 12 2.5L20 15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" /></svg>
+            </button>
+          </div>
+          <p id="updatedAt" class="updated-at" aria-live="polite"></p>
+
+          <div id="batchBar" class="batch-bar" hidden>
+            <span id="selectionSummary"></span>
+            <div class="batch-actions">
+              <button type="button" id="clearSelectionButton" class="text-button" data-i18n="clearSelection">Clear</button>
+              <button type="button" id="stopBatchButton" class="text-button" data-i18n="stopBatch" hidden>Stop</button>
+              <button type="button" id="unfollowSelectedButton" class="danger-button" data-i18n="unfollowSelected">Unfollow selected</button>
             </div>
           </div>
 
-          <div class="user-list" id="userList" aria-live="polite"></div>
+          <div class="user-list" id="userList"></div>
 
           <div class="loader" id="loader" aria-hidden="true">
+            <p id="loadingProgress" class="loading-progress" data-i18n="loadingConnections">Comparing your connections…</p>
             <div class="skeleton-row"><span></span><span></span><span></span></div>
             <div class="skeleton-row"><span></span><span></span><span></span></div>
             <div class="skeleton-row"><span></span><span></span><span></span></div>
@@ -103,10 +137,11 @@ const init = () => {
             <div class="advanced-toggle" id="advancedToggleGroup">
               <div>
                 <label for="advancedModeToggle" data-i18n="advancedLabel">Disable extension safety limits</label>
-                <p data-i18n="advancedHelp">Instagram’s own limits still apply and cannot be bypassed.</p>
+                <p data-i18n="advancedHelp">Instagram’s own limits still apply. Advanced mode turns off after 15 minutes.</p>
               </div>
               <input type="checkbox" id="advancedModeToggle" role="switch" />
             </div>
+            <button type="button" id="copyDiagnosticsButton" class="diagnostic-button" data-i18n="copyDiagnostics">Copy diagnostic report</button>
           </details>
         </div>
 
@@ -114,6 +149,17 @@ const init = () => {
           <span class="status-dot" aria-hidden="true"></span>
           <span data-i18n="footerNote">Actions are verified with Instagram before the interface changes.</span>
         </footer>
+
+        <div id="confirmDialog" class="confirm-backdrop" hidden>
+          <div class="confirm-card" role="alertdialog" aria-modal="true" aria-labelledby="confirmTitle" aria-describedby="confirmBody">
+            <h2 id="confirmTitle"></h2>
+            <p id="confirmBody"></p>
+            <div class="confirm-actions">
+              <button type="button" id="cancelConfirmButton" class="text-button" data-i18n="cancel">Cancel</button>
+              <button type="button" id="acceptConfirmButton" class="danger-button" data-i18n="confirmUnfollow">Unfollow</button>
+            </div>
+          </div>
+        </div>
       </section>
     </div>
   `;
@@ -122,3 +168,54 @@ const init = () => {
 };
 
 init();
+
+if (!window.__manageInstagramFollowersStorageBridge) {
+  window.__manageInstagramFollowersStorageBridge = true;
+  window.addEventListener("message", async (event) => {
+    if (event.source !== window || !event.data?.mifStorage) return;
+    const { action, payload, requestId } = event.data;
+
+    if (action === "get") {
+      const state = await chrome.runtime.sendMessage({
+        mifStorage: true,
+        action: "get",
+      });
+      window.postMessage(
+        {
+          mifStorage: true,
+          action: "state",
+          requestId,
+          payload: {
+            locale: state?.locale,
+            rateLimits: state?.rateLimits,
+          },
+        },
+        window.location.origin
+      );
+    }
+
+    if (action === "setLocale" && ["en", "pt"].includes(payload)) {
+      await chrome.runtime.sendMessage({
+        mifStorage: true,
+        action: "setLocale",
+        payload,
+      });
+    }
+
+    if (action === "setRateLimits") {
+      const sanitized = {
+        follow: Array.isArray(payload?.follow)
+          ? payload.follow.filter(Number.isFinite)
+          : [],
+        unfollow: Array.isArray(payload?.unfollow)
+          ? payload.unfollow.filter(Number.isFinite)
+          : [],
+      };
+      await chrome.runtime.sendMessage({
+        mifStorage: true,
+        action: "setRateLimits",
+        payload: sanitized,
+      });
+    }
+  });
+}

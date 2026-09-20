@@ -56,6 +56,7 @@
 }
 
 #manage-instagram-followers-root .my-component {
+  position: relative;
   width: min(100%, 38rem);
   max-height: min(92dvh, 52rem);
   display: flex;
@@ -198,6 +199,23 @@
   letter-spacing: -0.025em;
 }
 
+#manage-instagram-followers-root .primary-cta {
+  min-height: var(--button-height);
+  width: fit-content;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-xs);
+  margin-top: var(--space-sm);
+  padding-inline: var(--space-md);
+  border: 0;
+  border-radius: var(--radius-md);
+  background: var(--color-accent);
+  color: var(--color-accent-ink);
+  cursor: pointer;
+  font-weight: 800;
+}
+
 #manage-instagram-followers-root #info-text {
   max-width: 56ch;
   color: var(--color-muted);
@@ -258,6 +276,11 @@
   color: var(--color-warning-ink);
 }
 
+#manage-instagram-followers-root .notice[data-tone="success"] {
+  border-color: var(--color-success);
+  color: var(--color-success-ink);
+}
+
 #manage-instagram-followers-root .notice-icon,
 #manage-instagram-followers-root .notice-dismiss {
   flex: 0 0 auto;
@@ -298,6 +321,7 @@
   min-height: 1lh;
   margin-top: var(--space-2xs);
   font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }
 
 #manage-instagram-followers-root .filter-buttons {
@@ -330,8 +354,27 @@
   color: var(--color-ink);
 }
 
+#manage-instagram-followers-root .filter-count {
+  min-width: 1.4rem;
+  margin-left: var(--space-2xs);
+  padding: 0 var(--space-2xs);
+  border-radius: var(--radius-full);
+  background: var(--color-paper-3);
+  color: var(--color-neutral);
+  font-size: var(--text-sm);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.45;
+}
+
+#manage-instagram-followers-root .filter.filter-active .filter-count {
+  background: var(--color-paper-4);
+  color: var(--color-ink);
+}
+
 #manage-instagram-followers-root .input-group {
   display: none;
+  grid-template-columns: minmax(0, 1fr) minmax(8.5rem, auto) var(--control-size);
+  align-items: end;
   gap: var(--space-xs);
   padding: 0 var(--space-lg) var(--space-md);
 }
@@ -358,6 +401,85 @@
 #manage-instagram-followers-root .search-field:focus-within {
   outline-color: var(--color-focus);
   color: var(--color-ink);
+}
+
+#manage-instagram-followers-root .sort-control,
+#manage-instagram-followers-root .search-control {
+  min-width: 0;
+}
+
+#manage-instagram-followers-root .sort-select,
+#manage-instagram-followers-root .refresh-button {
+  min-height: var(--button-height);
+  border: var(--rule-thin) solid var(--color-rule);
+  border-radius: var(--radius-md);
+  background: var(--color-paper-2);
+  color: var(--color-ink);
+}
+
+#manage-instagram-followers-root .sort-select {
+  width: 100%;
+  padding-inline: var(--space-sm);
+}
+
+#manage-instagram-followers-root .refresh-button {
+  width: var(--control-size);
+  display: grid;
+  place-items: center;
+  padding: 0;
+  cursor: pointer;
+}
+
+#manage-instagram-followers-root .updated-at {
+  min-height: 1lh;
+  padding: 0 var(--space-lg) var(--space-xs);
+  color: var(--color-muted);
+  font-size: var(--text-sm);
+  text-align: end;
+}
+
+#manage-instagram-followers-root .batch-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-sm);
+  margin: 0 var(--space-lg) var(--space-sm);
+  padding: var(--space-xs) var(--space-sm);
+  border: var(--rule-thin) solid var(--color-warning);
+  border-radius: var(--radius-md);
+  background: var(--color-paper-2);
+  color: var(--color-ink);
+}
+
+#manage-instagram-followers-root .batch-actions,
+#manage-instagram-followers-root .confirm-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-xs);
+}
+
+#manage-instagram-followers-root .text-button,
+#manage-instagram-followers-root .danger-button,
+#manage-instagram-followers-root .diagnostic-button {
+  min-height: var(--control-size);
+  padding-inline: var(--space-sm);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  font-weight: 700;
+}
+
+#manage-instagram-followers-root .text-button,
+#manage-instagram-followers-root .diagnostic-button {
+  border: var(--rule-thin) solid var(--color-rule);
+  background: transparent;
+  color: var(--color-neutral);
+}
+
+#manage-instagram-followers-root .danger-button {
+  border: var(--rule-thin) solid var(--color-danger);
+  background: var(--color-danger-soft);
+  color: var(--color-danger-ink);
 }
 
 #manage-instagram-followers-root #searchInput {
@@ -397,6 +519,14 @@
   border-bottom: var(--rule-thin) solid var(--color-rule-soft);
   background: var(--color-paper);
   color: var(--color-ink);
+}
+
+#manage-instagram-followers-root .user-select {
+  width: 1.1rem;
+  height: 1.1rem;
+  flex: 0 0 auto;
+  accent-color: var(--color-accent);
+  cursor: pointer;
 }
 
 #manage-instagram-followers-root .user:last-child {
@@ -502,6 +632,12 @@
   padding: 0 var(--space-md) var(--space-md);
 }
 
+#manage-instagram-followers-root .loading-progress {
+  padding: var(--space-sm) var(--space-xs);
+  color: var(--color-muted);
+  font-size: var(--text-sm);
+}
+
 #manage-instagram-followers-root .skeleton-row {
   display: grid;
   grid-template-columns: 2.75rem minmax(0, 1fr) 5.5rem;
@@ -564,6 +700,45 @@
 
 #manage-instagram-followers-root .advanced-toggle p {
   margin-top: var(--space-2xs);
+}
+
+#manage-instagram-followers-root .diagnostic-button {
+  width: 100%;
+  margin-bottom: var(--space-md);
+}
+
+#manage-instagram-followers-root .confirm-backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: var(--z-toast);
+  display: grid;
+  place-items: center;
+  padding: var(--space-lg);
+  background: var(--color-backdrop);
+}
+
+#manage-instagram-followers-root .confirm-card {
+  width: min(100%, 25rem);
+  display: grid;
+  gap: var(--space-sm);
+  padding: var(--space-lg);
+  border: var(--rule-thin) solid var(--color-rule);
+  border-radius: var(--radius-lg);
+  background: var(--color-paper-2);
+  box-shadow: 0 var(--space-sm) var(--space-xl) var(--color-shadow);
+}
+
+#manage-instagram-followers-root .confirm-card h2 {
+  font-size: var(--text-md);
+}
+
+#manage-instagram-followers-root .confirm-card p {
+  color: var(--color-muted);
+}
+
+#manage-instagram-followers-root .confirm-backdrop[hidden],
+#manage-instagram-followers-root .batch-bar[hidden] {
+  display: none;
 }
 
 #manage-instagram-followers-root #advancedModeToggle {
@@ -671,11 +846,27 @@
   #manage-instagram-followers-root .list-tabs,
   #manage-instagram-followers-root .list-heading,
   #manage-instagram-followers-root .input-group,
+  #manage-instagram-followers-root .updated-at,
   #manage-instagram-followers-root .app-footer {
     padding-inline: var(--space-md);
   }
 
   #manage-instagram-followers-root .list-heading {
+    flex-direction: column;
+  }
+
+  #manage-instagram-followers-root .input-group {
+    grid-template-columns: minmax(0, 1fr) var(--control-size);
+  }
+
+  #manage-instagram-followers-root .sort-control {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+
+  #manage-instagram-followers-root .batch-bar {
+    margin-inline: var(--space-md);
+    align-items: flex-start;
     flex-direction: column;
   }
 

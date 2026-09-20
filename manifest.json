@@ -8,27 +8,27 @@
     "email": "contato@gabireze.com.br",
     "url": "https://gabireze.com.br/"
   },
-  "permissions": ["scripting"],
+  "permissions": ["scripting", "storage"],
   "host_permissions": ["https://*.instagram.com/*"],
   "background": {
     "service_worker": "background.js"
   },
   "icons": {
-    "16": "icon.png",
-    "48": "icon.png",
-    "128": "icon.png"
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
   },
   "action": {
     "default_icon": {
-      "16": "icon.png",
-      "48": "icon.png",
-      "128": "icon.png"
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
     },
     "default_title": "__MSG_extensionTitle__"
   },
   "web_accessible_resources": [
     {
-      "resources": ["script.js"],
+      "resources": ["core.js", "script.js"],
       "matches": ["https://*.instagram.com/*"]
     }
   ],
