@@ -42,11 +42,11 @@ Install directly from the Chrome Web Store:
 
 1. Log in to your Instagram account.
 2. Click the extension icon in the Chrome toolbar.
-3. Choose whether to view your followers or the accounts you follow.
-4. Use the search bar and filters to find users.
-5. Click the **Follow**, **Unfollow**, or **Cancel Request** button to manage each user.
+3. In the new Instagram tab, click **Find non-followers**.
+4. Review the results or switch between **Following** and **Followers**.
+5. Use search and filters, then click **Follow**, **Unfollow**, or **Cancel Request** to manage each user.
 
-The main **Find non-followers** action opens the most common workflow directly. The extension reuses an existing Instagram tab when possible.
+The extension always opens in a fresh Instagram tab for a consistent startup. The main **Find non-followers** action opens the most common workflow directly; the other connection lists appear after that first step.
 
 ---
 
@@ -77,7 +77,7 @@ The tests cover relationship normalization, filters, counters, sorting, and foll
 
 O **Manage Instagram Followers** ajuda a descobrir quem não segue você de volta, encontrar conexões mútuas, seguir novos seguidores e organizar com segurança a lista de perfis seguidos. A interface pode ser alternada entre inglês e português.
 
-O fluxo principal é o botão **Encontrar quem não me segue**. Também estão disponíveis busca, ordenação, atualização manual, filtros com contadores e seleção múltipla limitada aos perfis que não seguem você de volta.
+Ao clicar no ícone, a extensão abre uma nova aba do Instagram. O fluxo principal começa no botão **Encontrar quem não me segue**; depois, as listas **Seguindo** e **Seguidores**, busca, ordenação, atualização manual, filtros com contadores e seleção múltipla ficam disponíveis.
 
 ---
 

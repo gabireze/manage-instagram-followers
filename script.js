@@ -9,8 +9,18 @@ const translations = {
   en: {
     appTitle: "Manage Instagram Followers",
     introTitle: "See who doesn’t follow you back.",
+    introEyebrow: "Connection checkup",
     introBody:
       "Compare your connections, find non-followers, and clean up your following list.",
+    howItWorks: "How it works",
+    stepCompare: "Compare",
+    stepCompareDetail: "Followers and following",
+    stepReview: "Review",
+    stepReviewDetail: "See the relationship status",
+    stepDecide: "Decide",
+    stepDecideDetail: "Choose who to unfollow",
+    privacyNote: "Your connection data stays in this browser.",
+    backHome: "Back to start",
     followingTab: "Following",
     followersTab: "Followers",
     listsLabel: "Connection lists",
@@ -106,8 +116,18 @@ const translations = {
   pt: {
     appTitle: "Manage Instagram Followers",
     introTitle: "Veja quem não segue você de volta.",
+    introEyebrow: "Análise de conexões",
     introBody:
       "Compare suas conexões, encontre quem não segue você e organize a lista de perfis seguidos.",
+    howItWorks: "Como funciona",
+    stepCompare: "Compare",
+    stepCompareDetail: "Seguidores e seguindo",
+    stepReview: "Revise",
+    stepReviewDetail: "Veja o status da relação",
+    stepDecide: "Decida",
+    stepDecideDetail: "Escolha quem deixar de seguir",
+    privacyNote: "Seus dados de conexão permanecem neste navegador.",
+    backHome: "Voltar ao início",
     followingTab: "Seguindo",
     followersTab: "Seguidores",
     listsLabel: "Listas de conexões",
@@ -233,6 +253,8 @@ const overlay = document.getElementById("overlay");
 const infoText = document.getElementById("info-text");
 const title = document.getElementById("title");
 const workspace = document.getElementById("workspace");
+const listTabs = document.getElementById("listTabs");
+const introBlock = document.querySelector(".intro-block");
 const userList = document.getElementById("userList");
 const resultsSummary = document.getElementById("resultsSummary");
 const notice = document.getElementById("notice");
@@ -353,11 +375,30 @@ function resetUI() {
   searchGroup.style.display = "grid";
   titleAndFilter.style.display = "flex";
   workspace.hidden = false;
-  const introBlock = document.querySelector(".intro-block");
   introBlock.hidden = true;
-  introBlock.style.display = "none";
+  listTabs.hidden = false;
   dismissNotice();
   updateBatchBar();
+}
+
+function showHome() {
+  viewGeneration += 1;
+  batchCancelled = true;
+  caller = null;
+  currentFilter = "all";
+  selectedUserIds.clear();
+  userList.innerHTML = "";
+  workspace.hidden = true;
+  listTabs.hidden = true;
+  introBlock.hidden = false;
+  loadFollowingButton.classList.remove("is-active");
+  loadFollowersButton.classList.remove("is-active");
+  loadFollowingButton.removeAttribute("aria-current");
+  loadFollowersButton.removeAttribute("aria-current");
+  dismissNotice();
+  document
+    .getElementById("findNonFollowersButton")
+    .focus({ preventScroll: true });
 }
 
 function toggleFilterButtons(type) {
@@ -390,11 +431,14 @@ async function openList(type, initialFilter = "all") {
     showNotice(t("loginRequired"));
     return;
   }
+  const generation = ++viewGeneration;
+  caller = type;
   resetUI();
   currentFilter = initialFilter;
   setActiveListTab(type);
   toggleFilterButtons(type);
-  await fetchConnections(type);
+  await fetchConnections(type, generation);
+  if (generation !== viewGeneration) return;
   setFilter(initialFilter);
 }
 
@@ -403,6 +447,7 @@ loadFollowingButton.addEventListener("click", () => openList("Following"));
 document
   .getElementById("findNonFollowersButton")
   .addEventListener("click", () => openList("Following", "notFollowingBack"));
+document.getElementById("backHomeButton").addEventListener("click", showHome);
 
 function setActiveListTab(type) {
   loadFollowingButton.classList.toggle("is-active", type === "Following");
@@ -442,6 +487,7 @@ let currentFilter = "all";
 let lastUpdatedAt = null;
 let searchTimer = null;
 let renderGeneration = 0;
+let viewGeneration = 0;
 let visibleUserIds = [];
 const selectedUserIds = new Set();
 let batchCancelled = false;
@@ -597,7 +643,7 @@ async function ensureConnections(type) {
   return connections;
 }
 
-async function fetchConnections(type) {
+async function fetchConnections(type, generation) {
   caller = type;
   title.textContent =
     type === "Followers" ? t("followersTitle") : t("followingTitle");
@@ -609,6 +655,7 @@ async function fetchConnections(type) {
       ensureConnections(type),
       ensureConnections(companionType),
     ]);
+    if (generation !== viewGeneration) return;
     refreshRelationshipFlags();
     const users = [...selectedConnections.values()];
     loadedUsers.clear();
@@ -616,12 +663,13 @@ async function fetchConnections(type) {
     lastUpdatedAt = Date.now();
     updateUpdatedAt();
   } catch (error) {
+    if (generation !== viewGeneration) return;
     diagnostics.lastError = error?.message || String(error);
     console.error("Error when fetching data from Instagram:", error);
     showNotice(t("loadError"));
     renderEmptyState();
   } finally {
-    setLoading(false);
+    if (generation === viewGeneration) setLoading(false);
   }
 }
 

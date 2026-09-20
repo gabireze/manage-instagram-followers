@@ -36,6 +36,7 @@ const init = () => {
         </header>
 
         <div class="intro-block">
+          <span class="intro-eyebrow" data-i18n="introEyebrow">Connection checkup</span>
           <h2 data-i18n="introTitle">See who doesn’t follow you back.</h2>
           <p id="info-text" data-i18n="introBody">Compare your connections, find non-followers, and clean up your following list.</p>
           <button type="button" id="findNonFollowersButton" class="primary-cta data-action-control">
@@ -44,9 +45,18 @@ const init = () => {
               <path d="m9 6 6 6-6 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
             </svg>
           </button>
+          <ol class="intro-steps" data-i18n-aria-label="howItWorks" aria-label="How it works">
+            <li><span>1</span><div><strong data-i18n="stepCompare">Compare</strong><small data-i18n="stepCompareDetail">Followers and following</small></div></li>
+            <li><span>2</span><div><strong data-i18n="stepReview">Review</strong><small data-i18n="stepReviewDetail">See the relationship status</small></div></li>
+            <li><span>3</span><div><strong data-i18n="stepDecide">Decide</strong><small data-i18n="stepDecideDetail">Choose who to unfollow</small></div></li>
+          </ol>
+          <p class="privacy-note">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" aria-hidden="true"><rect x="5" y="10" width="14" height="10" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M8 10V7a4 4 0 0 1 8 0v3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+            <span data-i18n="privacyNote">Your connection data stays in this browser.</span>
+          </p>
         </div>
 
-        <nav class="list-tabs" aria-label="Connection lists" data-i18n-aria-label="listsLabel">
+        <nav id="listTabs" class="list-tabs" aria-label="Connection lists" data-i18n-aria-label="listsLabel" hidden>
           <button type="button" id="loadFollowingButton" class="list-tab data-action-control">
             <svg viewBox="0 0 24 24" width="18" height="18" fill="none" aria-hidden="true">
               <path d="M8 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm7-1h6m-3-3v6M2 20c.7-3.2 2.7-5 6-5 2 0 3.5.7 4.5 2" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" />
@@ -72,9 +82,14 @@ const init = () => {
 
         <div class="workspace" id="workspace" hidden>
           <div id="titleAndFilter" class="list-heading">
-            <div>
-              <h2 id="title">Following</h2>
-              <p id="resultsSummary" class="results-summary" aria-live="polite"></p>
+            <div class="title-copy">
+              <button type="button" id="backHomeButton" class="back-button" data-i18n-aria-label="backHome" aria-label="Back to start">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" aria-hidden="true"><path d="m15 6-6 6 6 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" /></svg>
+              </button>
+              <div>
+                <h2 id="title">Following</h2>
+                <p id="resultsSummary" class="results-summary" aria-live="polite"></p>
+              </div>
             </div>
             <div class="filter-buttons">
               <button type="button" id="filterAllButton" class="filter data-action-control filter-active" data-filter="all"><span data-i18n="allFilter">All</span><span class="filter-count" data-count="all"></span></button>

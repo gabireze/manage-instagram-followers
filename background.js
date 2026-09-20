@@ -1,5 +1,3 @@
-const INSTAGRAM_URL_PATTERN = "https://*.instagram.com/*";
-
 chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   if (!message?.mifStorage) return false;
 
@@ -39,30 +37,18 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   return true;
 });
 
-chrome.action.onClicked.addListener(async (clickedTab) => {
-  let targetTab = clickedTab;
-
-  if (!targetTab?.url?.startsWith("https://www.instagram.com/")) {
-    const instagramTabs = await chrome.tabs.query({
-      url: [INSTAGRAM_URL_PATTERN],
-    });
-    targetTab = instagramTabs.find((tab) => tab.active) || instagramTabs[0];
-  }
-
-  if (!targetTab?.id) {
-    targetTab = await chrome.tabs.create({ url: "https://www.instagram.com/" });
-    await waitForTab(targetTab.id);
-  } else {
-    await chrome.tabs.update(targetTab.id, { active: true });
-    if (targetTab.windowId) {
-      await chrome.windows.update(targetTab.windowId, { focused: true });
-    }
-  }
-
+chrome.action.onClicked.addListener(async () => {
+  const targetTab = await chrome.tabs.create({
+    url: "https://www.instagram.com/",
+  });
+  await waitForTab(targetTab.id);
   await injectExtension(targetTab.id);
 });
 
-function waitForTab(tabId) {
+async function waitForTab(tabId) {
+  const tab = await chrome.tabs.get(tabId);
+  if (tab.status === "complete") return;
+
   return new Promise((resolve, reject) => {
     const timeout = setTimeout(() => {
       chrome.tabs.onUpdated.removeListener(onUpdated);
